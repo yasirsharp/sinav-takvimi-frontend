@@ -55,6 +55,25 @@ src/
   pages/      Login, Ana Sayfa, 403, 404, "yakında" sayfası
 ```
 
+### Tema
+
+Görünüm [duzce.edu.tr](https://www.duzce.edu.tr/) ile uyumludur. Renkler sitenin ekran görüntüsünden ve logodan
+ölçülmüştür; tüm değerler `src/theme.ts` içindedir:
+
+| Renk | Değer | Kullanım |
+|---|---|---|
+| Lacivert | `#003366` | Logo yazısı, menü metni, menü altı kalın çizgi, birincil düğmeler, alt bilgi |
+| Turkuaz | `#33cccc` | Logodaki kanat, üst bandın başlangıcı, vurgular |
+| Mavi | `#208fc7` → `#166fc7` | Üst bandın geçişi, menüde seçili/üzerine gelinen öğe |
+| Gri | `#bbbbbb` / `#77716a` | Logo altı ayırıcı çizgi / italik slogan |
+
+Yazı tipi **Raleway**'dir (`@fontsource/raleway` ile pakete gömülü; Google Fonts'a istek atılmaz).
+Düzen sitedeki gibidir: alt köşeleri yuvarlak turkuaz→mavi üst bant, logo ve italik slogan,
+"İLETİŞİM" düğmesi gibi gri çerçeveli yuvarlak kullanıcı düğmesi, ince gri ayırıcı, büyük harfli lacivert
+ana menü ve altında kalın lacivert çizgi. Mobilde menü soldan açılan panele dönüşür.
+
+Logo dosyaları `src/assets/` altındadır (`duzce-logo.png`, amblem: `duzce-mark.png`, favicon: `public/favicon.png`).
+
 ### Roller
 
 `src/auth/roles.ts`, backend'deki `Business/Constants/Roles.cs` ile aynı tutulmalıdır:

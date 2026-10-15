@@ -2,6 +2,7 @@ import { Card, Col, Descriptions, Row, Tag, Typography } from 'antd'
 import dayjs from 'dayjs'
 import { useAuth } from '../auth/useAuth'
 import { roleLabel } from '../auth/roles'
+import { brand } from '../theme'
 
 export default function DashboardPage() {
   const { user } = useAuth()
@@ -10,16 +11,16 @@ export default function DashboardPage() {
   return (
     <Row gutter={[16, 16]}>
       <Col span={24}>
-        <Typography.Title level={3} style={{ marginTop: 0 }}>
+        <Typography.Title level={3} style={{ marginTop: 0, color: brand.navy }}>
           Hoş geldiniz, {user.name || user.email}
         </Typography.Title>
         <Typography.Text type="secondary">
-          Soldaki menüden yetkinize uygun ekranlara ulaşabilirsiniz.
+          Üstteki menüden yetkinize uygun ekranlara ulaşabilirsiniz.
         </Typography.Text>
       </Col>
 
       <Col xs={24} lg={12}>
-        <Card title="Hesap bilgileri">
+        <Card title="Hesap bilgileri" style={{ borderTop: `4px solid ${brand.turquoise}` }}>
           <Descriptions column={1} size="small">
             <Descriptions.Item label="Ad Soyad">{user.name || '-'}</Descriptions.Item>
             <Descriptions.Item label="E-posta">{user.email || '-'}</Descriptions.Item>
@@ -28,7 +29,7 @@ export default function DashboardPage() {
                 <Tag>Rol atanmamış</Tag>
               ) : (
                 user.roles.map((role) => (
-                  <Tag key={role} color="blue">
+                  <Tag key={role} color={brand.navy}>
                     {roleLabel(role)}
                   </Tag>
                 ))

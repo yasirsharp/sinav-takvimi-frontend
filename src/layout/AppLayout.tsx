@@ -1,23 +1,26 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, type CSSProperties } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
-import { Avatar, Button, Dropdown, Grid, Layout, Menu, Space, Typography, theme } from 'antd'
+import { Avatar, Button, Drawer, Dropdown, Grid, Layout, Menu, Typography } from 'antd'
 import type { MenuProps } from 'antd'
-import { LogoutOutlined, MenuFoldOutlined, MenuUnfoldOutlined, UserOutlined } from '@ant-design/icons'
+import { DownOutlined, LogoutOutlined, MenuOutlined, UserOutlined } from '@ant-design/icons'
 import { useAuth } from '../auth/useAuth'
 import { hasAnyRole, roleLabel } from '../auth/roles'
 import { isGroup, navigation } from './navigation'
+import { brand, currentYear } from '../theme'
+import logoUrl from '../assets/duzce-logo.png'
 
-const { Header, Sider, Content } = Layout
+const { Content, Footer } = Layout
+
+/** duzce.edu.tr'deki gibi ortalanmış içerik genişliği */
+const container: CSSProperties = { maxWidth: 1440, margin: '0 auto', padding: '0 24px' }
 
 export default function AppLayout() {
   const { user, logout } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
   const screens = Grid.useBreakpoint()
-  const isMobile = !screens.md
-  const [desktopCollapsed, setDesktopCollapsed] = useState(false)
-  const [mobileOpen, setMobileOpen] = useState(false)
-  const { token } = theme.useToken()
+  const isMobile = !screens.lg
+  const [drawerOpen, setDrawerOpen] = useState(false)
 
   const roles = useMemo(() => user?.roles ?? [], [user])
 
@@ -30,15 +33,15 @@ export default function AppLayout() {
           isGroup(entry)
             ? {
                 key: entry.key,
-                icon: entry.icon,
+                icon: isMobile ? entry.icon : undefined,
                 label: entry.label,
                 children: entry.children
                   .filter((child) => hasAnyRole(roles, child.roles))
                   .map((child) => ({ key: child.path, icon: child.icon, label: child.label })),
               }
-            : { key: entry.path, icon: entry.icon, label: entry.label },
+            : { key: entry.path, icon: isMobile ? entry.icon : undefined, label: entry.label },
         ),
-    [roles],
+    [roles, isMobile],
   )
 
   const openGroup = navigation.find(
@@ -46,6 +49,16 @@ export default function AppLayout() {
   )
 
   const userMenu: MenuProps['items'] = [
+    {
+      key: 'roles',
+      disabled: true,
+      label: (
+        <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+          {roles.length ? roles.map(roleLabel).join(', ') : 'Rol atanmamış'}
+        </Typography.Text>
+      ),
+    },
+    { type: 'divider' },
     {
       key: 'logout',
       icon: <LogoutOutlined />,
@@ -57,97 +70,132 @@ export default function AppLayout() {
     },
   ]
 
-  // Masaüstünde menü daraltılır, mobilde ekranın üstüne açılır
-  const siderCollapsed = isMobile ? !mobileOpen : desktopCollapsed
-  const toggleMenu = () => (isMobile ? setMobileOpen((open) => !open) : setDesktopCollapsed((c) => !c))
+  const onMenuClick: MenuProps['onClick'] = ({ key }) => {
+    navigate(key)
+    setDrawerOpen(false)
+  }
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
-      <Sider
-        collapsible
-        collapsed={siderCollapsed}
-        collapsedWidth={isMobile ? 0 : 80}
-        trigger={null}
-        width={240}
-        style={{ position: isMobile ? 'fixed' : 'sticky', top: 0, height: '100vh', zIndex: 20 }}
-      >
+      <header style={{ background: '#fff' }}>
+        {/* Üst band: sitedeki turkuaz → mavi geçiş, alt köşeleri yuvarlak */}
+        <div style={container}>
+          <div
+            style={{
+              height: isMobile ? 10 : 36,
+              background: brand.gradient,
+              borderRadius: isMobile ? '0 0 10px 10px' : '0 0 28px 28px',
+            }}
+          />
+        </div>
+
+        {/* Logo + slogan + kullanıcı */}
         <div
           style={{
-            height: 64,
+            ...container,
             display: 'flex',
             alignItems: 'center',
-            justifyContent: 'center',
-            color: '#fff',
-            fontWeight: 600,
-            fontSize: siderCollapsed ? 14 : 16,
-            padding: '0 12px',
-            whiteSpace: 'nowrap',
-            overflow: 'hidden',
+            justifyContent: 'space-between',
+            gap: 12,
+            paddingTop: isMobile ? 12 : 20,
+            paddingBottom: isMobile ? 12 : 14,
           }}
         >
-          {siderCollapsed ? 'DÜ' : 'DÜ Sınav Takvimi'}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+            {isMobile && (
+              <Button
+                type="text"
+                icon={<MenuOutlined style={{ fontSize: 20, color: brand.navy }} />}
+                aria-label="Menüyü aç"
+                onClick={() => setDrawerOpen(true)}
+              />
+            )}
+            <a
+              href="/"
+              onClick={(e) => {
+                e.preventDefault()
+                navigate('/')
+              }}
+              style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', minWidth: 0 }}
+              aria-label="Ana sayfa"
+            >
+              <img
+                src={logoUrl}
+                alt="Düzce Üniversitesi"
+                style={{ height: isMobile ? 26 : 46, width: 'auto', maxWidth: '100%' }}
+              />
+              <span
+                style={{
+                  color: brand.muted,
+                  fontStyle: 'italic',
+                  fontSize: isMobile ? 12 : 17,
+                  marginTop: isMobile ? 2 : 6,
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                Sınav Takvimi Sistemi
+              </span>
+            </a>
+          </div>
+
+          {/* Sitedeki "İLETİŞİM" düğmesi gibi gri çerçeveli, yuvarlak düğme */}
+          <Dropdown menu={{ items: userMenu }} trigger={['click']} placement="bottomRight">
+            <Button
+              shape="round"
+              size="large"
+              style={{ borderColor: '#d3d3d3', color: brand.navy, flexShrink: 0, paddingInline: isMobile ? 8 : 16 }}
+            >
+              <Avatar size="small" icon={<UserOutlined />} style={{ background: brand.navy }} />
+              {!isMobile && <span style={{ fontWeight: 600 }}>{user?.name || user?.email}</span>}
+              <DownOutlined style={{ fontSize: 11 }} />
+            </Button>
+          </Dropdown>
         </div>
+
+        {/* Ana menü: ince gri ayırıcı, büyük harfli menü, kalın lacivert çizgi */}
+        {!isMobile && (
+          <div style={container}>
+            <div style={{ borderTop: `2px solid ${brand.divider}` }}>
+              <Menu
+                className="du-main-menu"
+                mode="horizontal"
+                selectedKeys={[location.pathname]}
+                items={menuItems}
+                onClick={onMenuClick}
+                style={{ justifyContent: 'center', background: 'transparent' }}
+              />
+            </div>
+            <div style={{ height: 6, background: brand.navy, borderRadius: 3 }} />
+          </div>
+        )}
+        {isMobile && <div style={{ height: 4, background: brand.navy }} />}
+      </header>
+
+      <Drawer
+        open={isMobile && drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        placement="left"
+        size={280}
+        title={<img src={logoUrl} alt="Düzce Üniversitesi" style={{ height: 22 }} />}
+        styles={{ body: { padding: 0 } }}
+      >
         <Menu
-          theme="dark"
           mode="inline"
           selectedKeys={[location.pathname]}
           defaultOpenKeys={openGroup && isGroup(openGroup) ? [openGroup.key] : []}
           items={menuItems}
-          onClick={({ key }) => {
-            navigate(key)
-            if (isMobile) setMobileOpen(false)
-          }}
+          onClick={onMenuClick}
+          style={{ borderInlineEnd: 'none' }}
         />
-      </Sider>
+      </Drawer>
 
-      {isMobile && mobileOpen && (
-        <div
-          aria-hidden
-          onClick={() => setMobileOpen(false)}
-          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 10 }}
-        />
-      )}
+      <Content style={{ ...container, width: '100%', boxSizing: 'border-box', paddingTop: 24, paddingBottom: 24 }}>
+        <Outlet />
+      </Content>
 
-      <Layout>
-        <Header
-          style={{
-            background: token.colorBgContainer,
-            padding: '0 16px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            borderBottom: `1px solid ${token.colorBorderSecondary}`,
-          }}
-        >
-          <Button
-            type="text"
-            aria-label={siderCollapsed ? 'Menüyü aç' : 'Menüyü kapat'}
-            icon={siderCollapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-            onClick={toggleMenu}
-          />
-
-          <Dropdown menu={{ items: userMenu }} trigger={['click']} placement="bottomRight">
-            <Button type="text" style={{ height: 48 }}>
-              <Space>
-                <Avatar size="small" icon={<UserOutlined />} />
-                {!isMobile && (
-                  <span style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'flex-start', lineHeight: 1.2 }}>
-                    <Typography.Text strong>{user?.name}</Typography.Text>
-                    <Typography.Text type="secondary" style={{ fontSize: 12 }}>
-                      {roles.length ? roles.map(roleLabel).join(', ') : 'Rol atanmamış'}
-                    </Typography.Text>
-                  </span>
-                )}
-              </Space>
-            </Button>
-          </Dropdown>
-        </Header>
-
-        <Content style={{ margin: isMobile ? 12 : 24 }}>
-          <Outlet />
-        </Content>
-      </Layout>
+      <Footer style={{ background: brand.navy, color: 'rgba(255,255,255,0.85)', textAlign: 'center', padding: '16px 24px' }}>
+        © {currentYear} Düzce Üniversitesi · Sınav Takvimi Sistemi
+      </Footer>
     </Layout>
   )
 }
-

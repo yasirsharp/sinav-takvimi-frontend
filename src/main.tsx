@@ -6,7 +6,13 @@ import { App as AntApp, ConfigProvider } from 'antd'
 import trTR from 'antd/locale/tr_TR'
 import dayjs from 'dayjs'
 import 'dayjs/locale/tr'
+import '@fontsource/raleway/400.css'
+import '@fontsource/raleway/400-italic.css'
+import '@fontsource/raleway/500.css'
+import '@fontsource/raleway/600.css'
+import '@fontsource/raleway/700.css'
 import { AuthProvider } from './auth/AuthContext'
+import { theme } from './theme'
 import App from './App'
 import './index.css'
 
@@ -20,7 +26,7 @@ const queryClient = new QueryClient({
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <ConfigProvider locale={trTR} theme={{ token: { colorPrimary: '#1d4ed8', borderRadius: 6 } }}>
+    <ConfigProvider locale={trTR} theme={theme}>
       <AntApp>
         <QueryClientProvider client={queryClient}>
           <BrowserRouter>
