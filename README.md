@@ -1,1 +1,85 @@
-# sinav-takvimi-frontend
+# Sınav Takvimi — Frontend
+
+Düzce Üniversitesi Sınav Takvimi sisteminin web arayüzü.
+Backend: [yasirsharp/Backend](https://github.com/yasirsharp/Backend) (ASP.NET Core 8 Web API).
+
+**Teknolojiler:** React 19, TypeScript, Vite, Ant Design 6, React Router 7, TanStack Query, Axios.
+
+## Kurulum
+
+```bash
+npm install
+npm run dev          # http://localhost:5173
+```
+
+Geliştirmede `/api` istekleri Vite proxy ile `http://localhost:8081` adresindeki backend'e gider, bu yüzden
+CORS ayarı gerekmez. Farklı bir adres için `.env.example` dosyasını `.env` olarak kopyalayıp
+`VITE_DEV_API_PROXY_TARGET` değerini değiştirin.
+
+Backend'in açılması için JWT anahtarının tanımlı olması gerekir (Backend README'sine bakın):
+
+```bash
+cd ../Backend/API
+dotnet user-secrets set "TokenOptions:SecurityKey" "<en az 64 karakter rastgele değer>"
+dotnet run
+```
+
+## Komutlar
+
+| Komut | Açıklama |
+|---|---|
+| `npm run dev` | Geliştirme sunucusu |
+| `npm run build` | Tip kontrolü + production build (`dist/`) |
+| `npm run lint` | oxlint |
+| `npm test` | Vitest birim testleri |
+
+## Production
+
+Build alırken `VITE_API_BASE_URL` ortam değişkeniyle backend adresi verilir:
+
+```bash
+VITE_API_BASE_URL=https://api.sinav.duzce.edu.tr npm run build
+```
+
+- Frontend'in adresi, backend'deki `Cors:AllowedOrigins` listesine eklenmelidir.
+- `VITE_API_BASE_URL` boş bırakılırsa frontend ve API aynı alan adından sunulmalıdır (örneğin reverse proxy ile `/api` → backend).
+- Uygulama tek sayfalık (SPA) olduğu için web sunucusu bilinmeyen tüm yolları `index.html`'e yönlendirmelidir.
+
+## Yapı
+
+```
+src/
+  api/        axios istemcisi (Bearer token, 401'de otomatik çıkış), hata mesajları, login
+  auth/       token saklama, JWT çözme, roller, AuthProvider, ProtectedRoute
+  layout/     ana iskelet (menü + üst bar) ve navigation.tsx (menü/rota tanımları)
+  pages/      Login, Ana Sayfa, 403, 404, "yakında" sayfası
+```
+
+### Roller
+
+`src/auth/roles.ts`, backend'deki `Business/Constants/Roles.cs` ile aynı tutulmalıdır:
+
+| Grup | Roller | Görebildiği menüler |
+|---|---|---|
+| (herkes) | Giriş yapmış her kullanıcı | Ana Sayfa, Sınav Takvimi |
+| `Personel` | Planlayici + gorevli.personel + akademik.personel | Tanımlar, Müsaitlik |
+| `Planlayici` | Yonetici + bolum.gorevlisi | Sınav/ders düzenleme (sonraki aşama) |
+| `Yonetici` | super.admin, Admin | Yönetim |
+
+Yeni bir ekran eklemek için `src/layout/navigation.tsx` dosyasına öğe eklemek yeterlidir; menü ve rota oradan üretilir.
+Menüdeki rol kontrolü sadece kullanıcı deneyimi içindir; asıl yetki kontrolü backend'de yapılır.
+
+### Oturum
+
+- Kullanıcı bilgisi (ad, e-posta, roller, bölüm) JWT'den çözülür; token `localStorage`'da tutulur.
+- Token süresi dolunca veya herhangi bir istek 401 dönünce otomatik olarak çıkış yapılır.
+- **Güvenlik notu:** `localStorage` XSS saldırılarına açıktır. Backend'e refresh token + httpOnly cookie
+  desteği eklendiğinde bu yapıya geçilmesi önerilir.
+
+## Yol haritası
+
+- [x] Giriş, oturum yönetimi, rol bazlı menü ve ana iskelet
+- [ ] Tanım ekranları: Bölüm, Ders, Derslik, Akademik Personel
+- [ ] Sınav takvimi: liste, takvim görünümü, çakışma uyarılı ekleme/düzenleme, PDF raporlar
+- [ ] Müsaitlik takvimi
+- [ ] Kullanıcı ve yetki yönetimi, duyurular, bildirimler
