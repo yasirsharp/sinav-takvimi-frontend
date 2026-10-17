@@ -13,7 +13,7 @@ interface LoginFormValues {
 }
 
 export default function LoginPage() {
-  const { user, login } = useAuth()
+  const { user, login, sessionEndReason } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
   const [error, setError] = useState<string | null>(null)
@@ -78,6 +78,14 @@ export default function LoginPage() {
           </Typography.Paragraph>
 
           {error && <Alert type="error" title={error} showIcon style={{ marginBottom: 16 }} role="alert" />}
+          {!error && sessionEndReason === 'expired' && (
+            <Alert
+              type="warning"
+              title="Oturumunuzun süresi doldu. Lütfen tekrar giriş yapın."
+              showIcon
+              style={{ marginBottom: 16 }}
+            />
+          )}
 
           <Form<LoginFormValues> layout="vertical" onFinish={handleFinish} requiredMark={false} disabled={submitting}>
             <Form.Item

@@ -49,11 +49,31 @@ VITE_API_BASE_URL=https://api.sinav.duzce.edu.tr npm run build
 
 ```
 src/
-  api/        axios istemcisi (Bearer token, 401'de otomatik çıkış), hata mesajları, login
+  api/        axios istemcisi (Bearer token, 401'de otomatik çıkış), hata mesajları,
+              unwrap (success=false → hata) ve kaynak başına tipli API modülleri
   auth/       token saklama, JWT çözme, roller, AuthProvider, ProtectedRoute
-  layout/     ana iskelet (menü + üst bar) ve navigation.tsx (menü/rota tanımları)
+  components/ PageHeader, TableToolbar, BolumSelect, DeleteButton (onaylı silme)
+  features/   ekranlar: bolum, ders, derslik, akademikPersonel (sayfa + React Query hook'ları)
+  hooks/      useCan (rol kontrolü), useDefaultBolumFilter
+  layout/     ana iskelet, navigation.tsx (menü/rota tanımları), lazyPages.ts (kod bölme)
   pages/      Login, Ana Sayfa, 403, 404, "yakında" sayfası
+  utils/      Türkçe arama/sıralama, ders kodu normalizasyonu, geçici parola ayrıştırma
 ```
+
+### Tanım ekranları
+
+| Ekran | Görüntüleme | Ekle / düzenle / sil | Notlar |
+|---|---|---|---|
+| Bölümler | Personel | Yonetici | Satır genişletilince bölüm görevlileri listelenir; görevli atamak kişiye otomatik olarak `bolum.gorevlisi` rolü verir |
+| Dersler | Personel | Planlayici | Ders kodu büyük harfe çevrilir ve benzersizliği yazarken kontrol edilir; ortak derslerin bölümü yoktur |
+| Derslikler | Personel | Planlayici | Kapasite, ortak derslik ve aktif/pasif durumu |
+| Akademik Personel | Personel | Yonetici | Eklenen personel için oluşturulan kullanıcı adı ve geçici parola bir kez gösterilir |
+
+- Listeler tek seferde alınır; arama, sıralama ve sayfalama tarayıcıda yapılır. Arama Türkçe harflere duyarlıdır
+  ve ı/i farkını yok sayar (ör. "ins" → `INS101`, "inş" → "İnşaat").
+- Bölüm görevlisi, Ders ve Derslik sayfalarını kendi bölümleriyle filtrelenmiş olarak açar (filtre değiştirilebilir).
+- Yetkisi olmayan kullanıcı ekleme/düzenleme/silme düğmelerini görmez; asıl kontrol backend'dedir.
+- Silinemeyen kayıtlarda (ör. ilişkili ders-bölüm-personel eşleştirmesi) backend'in mesajı olduğu gibi gösterilir.
 
 ### Tema
 
@@ -91,14 +111,16 @@ Menüdeki rol kontrolü sadece kullanıcı deneyimi içindir; asıl yetki kontro
 ### Oturum
 
 - Kullanıcı bilgisi (ad, e-posta, roller, bölüm) JWT'den çözülür; token `localStorage`'da tutulur.
-- Token süresi dolunca veya herhangi bir istek 401 dönünce otomatik olarak çıkış yapılır.
+- Token süresi dolunca veya herhangi bir istek 401 dönünce otomatik olarak çıkış yapılır; giriş sayfasında
+  "oturumunuzun süresi doldu" uyarısı gösterilir ve tekrar girişte kalınan sayfaya dönülür.
+- Kullanıcı kendisi çıkış yaptıysa kaldığı sayfa hatırlanmaz (aynı bilgisayarda başka biri giriş yapabilir).
 - **Güvenlik notu:** `localStorage` XSS saldırılarına açıktır. Backend'e refresh token + httpOnly cookie
   desteği eklendiğinde bu yapıya geçilmesi önerilir.
 
 ## Yol haritası
 
 - [x] Giriş, oturum yönetimi, rol bazlı menü ve ana iskelet
-- [ ] Tanım ekranları: Bölüm, Ders, Derslik, Akademik Personel
+- [x] Tanım ekranları: Bölüm (görevli atama dahil), Ders, Derslik, Akademik Personel
 - [ ] Sınav takvimi: liste, takvim görünümü, çakışma uyarılı ekleme/düzenleme, PDF raporlar
 - [ ] Müsaitlik takvimi
 - [ ] Kullanıcı ve yetki yönetimi, duyurular, bildirimler

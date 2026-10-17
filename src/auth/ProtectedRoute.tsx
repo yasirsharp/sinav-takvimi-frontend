@@ -9,11 +9,13 @@ interface ProtectedRouteProps {
 }
 
 export default function ProtectedRoute({ roles }: ProtectedRouteProps) {
-  const { user } = useAuth()
+  const { user, sessionEndReason } = useAuth()
   const location = useLocation()
 
   if (!user) {
-    return <Navigate to="/login" replace state={{ from: location.pathname }} />
+    // Kullanıcı kendisi çıkış yaptıysa kaldığı sayfa hatırlanmaz; sonraki giriş (başka biri olabilir) ana sayfaya gider
+    const state = sessionEndReason === 'logout' ? undefined : { from: location.pathname }
+    return <Navigate to="/login" replace state={state} />
   }
 
   if (!hasAnyRole(user.roles, roles)) {

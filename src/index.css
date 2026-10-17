@@ -28,3 +28,10 @@ body {
 .du-main-menu.ant-menu-horizontal > .ant-menu-submenu::after {
   border-bottom-width: 3px !important;
 }
+
+/* Küçük ekranlarda kart iç boşluğunu daralt; tablolar için daha fazla alan kalsın */
+@media (max-width: 575px) {
+  .ant-card .ant-card-body {
+    padding: 12px;
+  }
+}

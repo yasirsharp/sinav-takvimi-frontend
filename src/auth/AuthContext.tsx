@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { setUnauthorizedHandler } from '../api/client'
 import { login as loginRequest } from '../api/auth'
-import { AuthContext } from './authContext'
+import { AuthContext, type SessionEndReason } from './authContext'
 import { isExpired, parseToken, type CurrentUser } from './jwt'
 import { tokenStorage } from './tokenStorage'
 
@@ -18,11 +18,16 @@ function readStoredUser(): CurrentUser | null {
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<CurrentUser | null>(readStoredUser)
+  const [sessionEndReason, setSessionEndReason] = useState<SessionEndReason | null>(null)
 
-  const logout = useCallback(() => {
+  const endSession = useCallback((reason: SessionEndReason) => {
     tokenStorage.clear()
+    setSessionEndReason(reason)
     setUser(null)
   }, [])
+
+  const logout = useCallback(() => endSession('logout'), [endSession])
+  const expire = useCallback(() => endSession('expired'), [endSession])
 
   const login = useCallback(async (identifier: string, password: string) => {
     const { token } = await loginRequest(identifier, password)
@@ -31,24 +36,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       throw new Error('Sunucudan geçersiz oturum bilgisi alındı.')
     }
     tokenStorage.set(token)
+    setSessionEndReason(null)
     setUser(parsed)
   }, [])
 
   // Herhangi bir API isteği 401 dönerse oturumu kapat
   useEffect(() => {
-    setUnauthorizedHandler(logout)
+    setUnauthorizedHandler(expire)
     return () => setUnauthorizedHandler(null)
-  }, [logout])
+  }, [expire])
 
   // Token süresi dolduğunda otomatik çıkış
   useEffect(() => {
     if (!user) return
     // setTimeout en fazla ~24,8 gün bekleyebilir
     const delay = Math.min(Math.max(user.expiresAt - Date.now(), 0), 2_147_483_647)
-    const timer = window.setTimeout(logout, delay)
+    const timer = window.setTimeout(expire, delay)
     return () => window.clearTimeout(timer)
-  }, [user, logout])
+  }, [user, expire])
 
-  const value = useMemo(() => ({ user, login, logout }), [user, login, logout])
+  const value = useMemo(
+    () => ({ user, sessionEndReason, login, logout }),
+    [user, sessionEndReason, login, logout],
+  )
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

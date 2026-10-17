@@ -7,7 +7,8 @@ import LoginPage from './pages/LoginPage'
 import NotFoundPage from './pages/NotFoundPage'
 import PlaceholderPage from './pages/PlaceholderPage'
 
-const comingSoonPages = flattenNavigation().filter((item) => item.comingSoon)
+// Ana sayfa dışındaki tüm menü sayfaları; bileşeni olmayanlar "yakında" sayfası gösterir
+const pages = flattenNavigation().filter((item) => item.path !== '/')
 
 export default function App() {
   return (
@@ -18,9 +19,9 @@ export default function App() {
         <Route element={<AppLayout />}>
           <Route index element={<DashboardPage />} />
 
-          {comingSoonPages.map((item) => (
+          {pages.map((item) => (
             <Route key={item.path} element={<ProtectedRoute roles={item.roles} />}>
-              <Route path={item.path} element={<PlaceholderPage title={item.label} />} />
+              <Route path={item.path} element={item.element ?? <PlaceholderPage title={item.label} />} />
             </Route>
           ))}
 

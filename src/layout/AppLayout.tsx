@@ -1,6 +1,6 @@
-import { useMemo, useState, type CSSProperties } from 'react'
+import { Suspense, useMemo, useState, type CSSProperties } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
-import { Avatar, Button, Drawer, Dropdown, Grid, Layout, Menu, Typography } from 'antd'
+import { Avatar, Button, Drawer, Dropdown, Grid, Layout, Menu, Spin, Typography } from 'antd'
 import type { MenuProps } from 'antd'
 import { DownOutlined, LogoutOutlined, MenuOutlined, UserOutlined } from '@ant-design/icons'
 import { useAuth } from '../auth/useAuth'
@@ -63,10 +63,8 @@ export default function AppLayout() {
       key: 'logout',
       icon: <LogoutOutlined />,
       label: 'Çıkış yap',
-      onClick: () => {
-        logout()
-        navigate('/login', { replace: true })
-      },
+      // /login'e yönlendirmeyi ProtectedRoute yapar
+      onClick: logout,
     },
   ]
 
@@ -190,7 +188,9 @@ export default function AppLayout() {
       </Drawer>
 
       <Content style={{ ...container, width: '100%', boxSizing: 'border-box', paddingTop: 24, paddingBottom: 24 }}>
-        <Outlet />
+        <Suspense fallback={<Spin size="large" style={{ display: 'block', margin: '64px auto' }} />}>
+          <Outlet />
+        </Suspense>
       </Content>
 
       <Footer style={{ background: brand.navy, color: 'rgba(255,255,255,0.85)', textAlign: 'center', padding: '16px 24px' }}>
