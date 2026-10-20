@@ -69,12 +69,22 @@ src/
 | Derslikler | Personel | Planlayici | Kapasite, ortak derslik ve aktif/pasif durumu |
 | Akademik Personel | Personel | Yonetici | Eklenen personel için oluşturulan kullanıcı adı ve geçici parola bir kez gösterilir |
 | Ders Atamaları | Personel | Planlayici | Hangi dersi hangi bölümde kimin verdiği (DBAP). Ders listesi seçilen bölümün dersleri + ortak derslerle sınırlıdır; aynı atama tekrar eklenemez; öğretim elemanı atanmamış dersler uyarıyla listelenir (bu derslerin sınavı eklenemez) |
+| Öğrenciler | Personel | Yonetici | Bölüm ve sınıf filtresi. Eklenen öğrenci için kullanıcı hesabı açılır (kullanıcı adı öğrenci no) ve geçici parola bir kez gösterilir. Pasifleştirilen öğrenci giriş yapamaz |
 
 - Listeler tek seferde alınır; arama, sıralama ve sayfalama tarayıcıda yapılır. Arama Türkçe harflere duyarlıdır
   ve ı/i farkını yok sayar (ör. "ins" → `INS101`, "inş" → "İnşaat").
 - Bölüm görevlisi, Ders ve Derslik sayfalarını kendi bölümleriyle filtrelenmiş olarak açar (filtre değiştirilebilir).
 - Yetkisi olmayan kullanıcı ekleme/düzenleme/silme düğmelerini görmez; asıl kontrol backend'dedir.
 - Silinemeyen kayıtlarda (ör. ilişkili ders-bölüm-personel eşleştirmesi) backend'in mesajı olduğu gibi gösterilir.
+
+### Yönetim
+
+- **Kullanıcılar** (Yonetici): ad, kullanıcı adı veya e-postayla arama; rol ve durum filtresi; düzenleme,
+  aktif/pasif, rol ekleme/kaldırma (değişiklik hemen kaydedilir), parola sıfırlama (geçici parola bir kez
+  gösterilir) ve silme. Süper yönetici hesaplarını yalnızca süper yönetici değiştirebilir. Kişi kendi hesabını
+  pasifleştiremez, silemez ve kendi yönetici rolünü kaldıramaz. Rol açıklamaları "Roller hakkında" panelindedir.
+- **Duyurular** (Planlayici): başlık, içerik, tür, öncelik, hedef kitle (herkes/öğrenciler/personel/yöneticiler),
+  hedef bölüm, yayın ve bitiş tarihi, açılır pencere. Bölüm görevlisi sadece kendi bölümlerine duyuru yayınlar.
 
 ### Sınav takvimi
 
@@ -154,4 +164,5 @@ Menüdeki rol kontrolü sadece kullanıcı deneyimi içindir; asıl yetki kontro
 - [x] Ders atamaları (ders–bölüm–öğretim elemanı)
 - [x] Sınav takvimi: haftalık/aylık/liste görünüm, çakışma uyarılı ekleme/düzenleme, sürükle-bırak, PDF raporlar
 - [ ] Müsaitlik takvimi
-- [ ] Kullanıcı ve yetki yönetimi, duyurular, bildirimler
+- [x] Kullanıcı yönetimi (roller, parola sıfırlama), öğrenciler, duyurular
+- [ ] Bildirim zili, duyuru açılır penceresi, role göre ana sayfa

@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { Alert, App, AutoComplete, Button, Card, Descriptions, Form, Input, Modal, Table, Tag, Tooltip, Typography } from 'antd'
+import { Alert, App, AutoComplete, Button, Card, Form, Input, Modal, Table, Tag, Tooltip } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import { EditOutlined, PlusOutlined } from '@ant-design/icons'
 import type { AkademikPersonel, AkademikPersonelFormValues } from '../../api/akademikPersonel'
@@ -11,7 +11,9 @@ import { defaultPagination } from '../../components/tableDefaults'
 import { useCan } from '../../hooks/usePermission'
 import { Yonetici } from '../../auth/roles'
 import { compareTr, matchesSearch } from '../../utils/search'
-import { parseTemporaryCredentials, type TemporaryCredentials } from '../../utils/tempPassword'
+import { parseTemporaryCredentials } from '../../utils/tempPassword'
+import CredentialsModal, { type CredentialsInfo } from '../../components/CredentialsModal'
+import type { CreatedAccount } from '../../api/account'
 import { useAkademikPersoneller, useDeleteAkademikPersonel, useSaveAkademikPersonel } from './queries'
 
 /** Yaygın akademik unvanlar (serbest giriş de yapılabilir) */
@@ -32,7 +34,7 @@ export default function AkademikPersonelPage() {
   const deletePersonel = useDeleteAkademikPersonel()
   const [search, setSearch] = useState('')
   const [editing, setEditing] = useState<AkademikPersonel | null | undefined>(undefined)
-  const [credentials, setCredentials] = useState<(TemporaryCredentials & { ad: string }) | null>(null)
+  const [credentials, setCredentials] = useState<CredentialsInfo | null>(null)
 
   const rows = useMemo(() => (data ?? []).filter((p) => matchesSearch(search, p.ad, p.unvan)), [data, search])
 
@@ -119,14 +121,16 @@ export default function AkademikPersonelPage() {
       <PersonelFormModal
         personel={editing}
         onClose={() => setEditing(undefined)}
-        onCreated={(ad, resultMessage) => {
-          const parsed = parseTemporaryCredentials(resultMessage)
-          if (parsed) setCredentials({ ...parsed, ad })
+        onCreated={(ad, account, resultMessage) => {
+          const parsed = account
+            ? { userName: account.userName, password: account.temporaryPassword }
+            : parseTemporaryCredentials(resultMessage)
+          if (parsed) setCredentials({ ...parsed, owner: ad })
           else message.success(resultMessage || 'Akademik personel eklendi.')
         }}
       />
 
-      <CredentialsModal credentials={credentials} onClose={() => setCredentials(null)} />
+      <CredentialsModal title="Personel eklendi" credentials={credentials} onClose={() => setCredentials(null)} />
     </>
   )
 }
@@ -134,8 +138,8 @@ export default function AkademikPersonelPage() {
 interface PersonelFormModalProps {
   personel: AkademikPersonel | null | undefined
   onClose: () => void
-  /** Yeni personel eklendiğinde backend mesajıyla çağrılır (geçici parola bu mesajdadır) */
-  onCreated: (ad: string, message: string | null | undefined) => void
+  /** Yeni personel eklendiğinde backend yanıtıyla çağrılır (geçici parola data'da veya eski backend'de mesajda) */
+  onCreated: (ad: string, account: CreatedAccount | null | undefined, message: string | null | undefined) => void
 }
 
 function PersonelFormModal({ personel, onClose, onCreated }: PersonelFormModalProps) {
@@ -144,13 +148,17 @@ function PersonelFormModal({ personel, onClose, onCreated }: PersonelFormModalPr
   const save = useSaveAkademikPersonel()
 
   const handleFinish = async (values: AkademikPersonelFormValues) => {
-    const cleaned = { ad: values.ad.trim().replace(/\s+/g, ' '), unvan: values.unvan.trim() }
+    const cleaned = {
+      ad: values.ad.trim().replace(/\s+/g, ' '),
+      unvan: values.unvan.trim(),
+      email: values.email?.trim() || null,
+    }
     try {
       const result = await save.mutateAsync({ personel: personel ?? undefined, values: cleaned })
       if (personel) {
         message.success('Akademik personel güncellendi.')
       } else {
-        onCreated(cleaned.ad, result.message)
+        onCreated(cleaned.ad, result.data, result.message)
       }
       onClose()
     } catch (err) {
@@ -202,56 +210,20 @@ function PersonelFormModal({ personel, onClose, onCreated }: PersonelFormModalPr
               },
             },
           ]}
-          extra="Kullanıcı adı ad soyadın baş harflerinden üretilir."
         >
           <Input autoFocus={!!personel} placeholder="ör. Ayşe Yılmaz" />
         </Form.Item>
+        {!personel && (
+          <Form.Item
+            label="Kurumsal e-posta"
+            name="email"
+            rules={[{ type: 'email', message: 'Geçerli bir e-posta girin.' }]}
+            extra="Verilirse kullanıcı adı e-postanın @ öncesi olur (ör. ayse.yilmaz). Boşsa ad soyadın baş harfleri + 4 rakam."
+          >
+            <Input placeholder="ayse.yilmaz@duzce.edu.tr" />
+          </Form.Item>
+        )}
       </Form>
-    </Modal>
-  )
-}
-
-function CredentialsModal({
-  credentials,
-  onClose,
-}: {
-  credentials: (TemporaryCredentials & { ad: string }) | null
-  onClose: () => void
-}) {
-  return (
-    <Modal
-      title="Personel eklendi"
-      open={!!credentials}
-      onCancel={onClose}
-      onOk={onClose}
-      okText="Bilgileri kaydettim"
-      cancelButtonProps={{ style: { display: 'none' } }}
-      mask={{ closable: false }}
-    >
-      {credentials && (
-        <>
-          <Alert
-            type="warning"
-            showIcon
-            style={{ marginBottom: 16 }}
-            title="Bu bilgiler bir daha gösterilmeyecek."
-            description="Kullanıcı adını ve geçici parolayı personele güvenli bir yolla iletin."
-          />
-          <Descriptions column={1} bordered size="small">
-            <Descriptions.Item label="Personel">{credentials.ad}</Descriptions.Item>
-            <Descriptions.Item label="Kullanıcı adı">
-              <Typography.Text copyable strong>
-                {credentials.userName}
-              </Typography.Text>
-            </Descriptions.Item>
-            <Descriptions.Item label="Geçici parola">
-              <Typography.Text copyable code>
-                {credentials.password}
-              </Typography.Text>
-            </Descriptions.Item>
-          </Descriptions>
-        </>
-      )}
     </Modal>
   )
 }

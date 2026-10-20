@@ -11,9 +11,21 @@ import {
   ApartmentOutlined,
   DatabaseOutlined,
   SolutionOutlined,
+  IdcardOutlined,
+  NotificationOutlined,
 } from '@ant-design/icons'
-import { Personel, Yonetici } from '../auth/roles'
-import { AkademikPersonelPage, BolumPage, DbapPage, DersPage, DerslikPage, SinavTakvimiPage } from './lazyPages'
+import { Personel, Planlayici, Yonetici } from '../auth/roles'
+import {
+  AkademikPersonelPage,
+  BolumPage,
+  DbapPage,
+  DersPage,
+  DerslikPage,
+  DuyuruPage,
+  OgrenciPage,
+  SinavTakvimiPage,
+  UsersPage,
+} from './lazyPages'
 
 export interface NavItem {
   path: string
@@ -68,6 +80,7 @@ export const navigation: NavEntry[] = [
         roles: Personel,
         element: <DbapPage />,
       },
+      { path: '/tanimlar/ogrenciler', label: 'Öğrenciler', icon: <IdcardOutlined />, roles: Personel, element: <OgrenciPage /> },
     ],
   },
   { path: '/musaitlik', label: 'Müsaitlik', icon: <ClockCircleOutlined />, roles: Personel },
@@ -75,10 +88,11 @@ export const navigation: NavEntry[] = [
     key: 'yonetim',
     label: 'Yönetim',
     icon: <SafetyOutlined />,
-    roles: Yonetici,
+    roles: Planlayici,
     children: [
-      { path: '/yonetim/kullanicilar', label: 'Kullanıcılar', icon: <UserOutlined />, roles: Yonetici },
-      { path: '/yonetim/yetkiler', label: 'Yetkiler', icon: <SafetyOutlined />, roles: Yonetici },
+      { path: '/yonetim/kullanicilar', label: 'Kullanıcılar', icon: <UserOutlined />, roles: Yonetici, element: <UsersPage /> },
+      // Bölüm görevlisi kendi bölümüne duyuru yayınlar
+      { path: '/yonetim/duyurular', label: 'Duyurular', icon: <NotificationOutlined />, roles: Planlayici, element: <DuyuruPage /> },
     ],
   },
 ]

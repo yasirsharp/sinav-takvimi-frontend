@@ -35,3 +35,8 @@ body {
     padding: 12px;
   }
 }
+
+/* Pasif kullanıcı/öğrenci satırları soluk gösterilir */
+.du-row-passive td {
+  color: rgba(0, 0, 0, 0.45);
+}
