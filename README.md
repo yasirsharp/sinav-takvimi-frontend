@@ -53,7 +53,7 @@ src/
               unwrap (success=false → hata) ve kaynak başına tipli API modülleri
   auth/       token saklama, JWT çözme, roller, AuthProvider, ProtectedRoute
   components/ PageHeader, TableToolbar, BolumSelect, DeleteButton (onaylı silme)
-  features/   ekranlar: bolum, ders, derslik, akademikPersonel (sayfa + React Query hook'ları)
+  features/   ekranlar: bolum, ders, derslik, akademikPersonel, dbap (sayfa + React Query hook'ları)
   hooks/      useCan (rol kontrolü), useDefaultBolumFilter
   layout/     ana iskelet, navigation.tsx (menü/rota tanımları), lazyPages.ts (kod bölme)
   pages/      Login, Ana Sayfa, 403, 404, "yakında" sayfası
@@ -68,6 +68,7 @@ src/
 | Dersler | Personel | Planlayici | Ders kodu büyük harfe çevrilir ve benzersizliği yazarken kontrol edilir; ortak derslerin bölümü yoktur |
 | Derslikler | Personel | Planlayici | Kapasite, ortak derslik ve aktif/pasif durumu |
 | Akademik Personel | Personel | Yonetici | Eklenen personel için oluşturulan kullanıcı adı ve geçici parola bir kez gösterilir |
+| Ders Atamaları | Personel | Planlayici | Hangi dersi hangi bölümde kimin verdiği (DBAP). Ders listesi seçilen bölümün dersleri + ortak derslerle sınırlıdır; aynı atama tekrar eklenemez; öğretim elemanı atanmamış dersler uyarıyla listelenir (bu derslerin sınavı eklenemez) |
 
 - Listeler tek seferde alınır; arama, sıralama ve sayfalama tarayıcıda yapılır. Arama Türkçe harflere duyarlıdır
   ve ı/i farkını yok sayar (ör. "ins" → `INS101`, "inş" → "İnşaat").
@@ -121,6 +122,7 @@ Menüdeki rol kontrolü sadece kullanıcı deneyimi içindir; asıl yetki kontro
 
 - [x] Giriş, oturum yönetimi, rol bazlı menü ve ana iskelet
 - [x] Tanım ekranları: Bölüm (görevli atama dahil), Ders, Derslik, Akademik Personel
+- [x] Ders atamaları (ders–bölüm–öğretim elemanı)
 - [ ] Sınav takvimi: liste, takvim görünümü, çakışma uyarılı ekleme/düzenleme, PDF raporlar
 - [ ] Müsaitlik takvimi
 - [ ] Kullanıcı ve yetki yönetimi, duyurular, bildirimler

@@ -10,9 +10,10 @@ import {
   UserOutlined,
   ApartmentOutlined,
   DatabaseOutlined,
+  SolutionOutlined,
 } from '@ant-design/icons'
 import { Personel, Yonetici } from '../auth/roles'
-import { AkademikPersonelPage, BolumPage, DersPage, DerslikPage } from './lazyPages'
+import { AkademikPersonelPage, BolumPage, DbapPage, DersPage, DerslikPage } from './lazyPages'
 
 export interface NavItem {
   path: string
@@ -59,6 +60,13 @@ export const navigation: NavEntry[] = [
         icon: <TeamOutlined />,
         roles: Personel,
         element: <AkademikPersonelPage />,
+      },
+      {
+        path: '/tanimlar/ders-atamalari',
+        label: 'Ders Atamaları',
+        icon: <SolutionOutlined />,
+        roles: Personel,
+        element: <DbapPage />,
       },
     ],
   },
