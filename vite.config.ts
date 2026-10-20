@@ -31,6 +31,8 @@ export default defineConfig(({ mode }) => {
     },
     server: {
       port: 5173,
+      // Playwright çıktıları değişince sayfa yenilenmesin (testler çalışırken sayfa sıfırlanıyordu)
+      watch: { ignored: ['**/e2e-report/**', '**/test-results/**', '**/playwright-report/**'] },
       // Geliştirmede /api istekleri backend'e yönlendirilir; böylece CORS ayarı gerekmez.
       proxy: {
         '/api': {

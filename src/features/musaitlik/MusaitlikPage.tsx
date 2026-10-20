@@ -5,7 +5,6 @@ import timeGridPlugin from '@fullcalendar/timegrid'
 import interactionPlugin from '@fullcalendar/interaction'
 import trLocale from '@fullcalendar/core/locales/tr'
 import type { DateSelectArg, DatesSetArg, EventClickArg, EventInput } from '@fullcalendar/core'
-import { useQuery } from '@tanstack/react-query'
 import dayjs, { type Dayjs } from 'dayjs'
 import {
   Alert,
@@ -31,15 +30,13 @@ import {
 } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import { DeleteOutlined, EditOutlined, PlusOutlined } from '@ant-design/icons'
-import { akademikPersonelApi } from '../../api/akademikPersonel'
 import { TekrarTipi, type Musaitlik, type MusaitlikValues, type TekrarTipiValue } from '../../api/musaitlik'
 import { getErrorMessage } from '../../api/errors'
 import PageHeader from '../../components/PageHeader'
-import { useAuth } from '../../auth/useAuth'
 import { useCan } from '../../hooks/usePermission'
 import { Planlayici } from '../../auth/roles'
 import { compareTr, matchesSearch } from '../../utils/search'
-import { useAkademikPersoneller } from '../akademikPersonel/queries'
+import { useAkademikPersoneller, useOwnPersonel } from '../akademikPersonel/queries'
 import { describeHours, describeRecurrence, expandMusaitlik } from './musaitlikUtils'
 import { useDeleteMusaitlik, useMusaitlikler, useSaveMusaitlik } from './queries'
 import '../sinav/calendar.css'
@@ -72,17 +69,11 @@ interface FormDefaults {
 }
 
 export default function MusaitlikPage() {
-  const { user } = useAuth()
   const isPlanlayici = useCan(Planlayici)
   const { data: personeller } = useAkademikPersoneller()
-  const ownPersonel = useQuery({
-    queryKey: ['akademikPersonel', 'byUser', user?.id],
-    queryFn: () => akademikPersonelApi.getByUserId(user!.id),
-    enabled: !!user,
-    retry: false,
-  })
+  const own = useOwnPersonel()
   const [selectedPersonelId, setSelectedPersonelId] = useState<number | null>(null)
-  const personelId = selectedPersonelId ?? ownPersonel.data?.id ?? null
+  const personelId = selectedPersonelId ?? own.personel?.id ?? null
 
   const [view, setView] = useState<'takvim' | 'liste'>('takvim')
   const [range, setRange] = useState<{ start: Dayjs; end: Dayjs } | null>(null)
@@ -94,8 +85,8 @@ export default function MusaitlikPage() {
   const remove = useDeleteMusaitlik()
   const { message } = App.useApp()
 
-  const canEdit = isPlanlayici || (ownPersonel.data != null && personelId === ownPersonel.data.id)
-  const personel = personeller?.find((p) => p.id === personelId) ?? ownPersonel.data
+  const canEdit = isPlanlayici || (own.personel != null && personelId === own.personel.id)
+  const personel = personeller?.find((p) => p.id === personelId) ?? own.personel
 
   const events = useMemo<EventInput[]>(() => {
     if (!range || !kayitlar) return []
@@ -187,7 +178,7 @@ export default function MusaitlikPage() {
     [personeller],
   )
 
-  const noRecord = !isPlanlayici && ownPersonel.isError
+  const noRecord = !isPlanlayici && own.noRecord
   return (
     <>
       <PageHeader
@@ -239,7 +230,7 @@ export default function MusaitlikPage() {
           {error && <Alert type="error" showIcon title={getErrorMessage(error)} style={{ marginBottom: 16 }} />}
 
           {personelId == null ? (
-            ownPersonel.isLoading ? <Spin /> : <Empty description="Müsaitliğini görmek istediğiniz personeli seçin." />
+            own.isLoading ? <Spin /> : <Empty description="Müsaitliğini görmek istediğiniz personeli seçin." />
           ) : view === 'takvim' ? (
             <div className="du-calendar">
               <FullCalendar

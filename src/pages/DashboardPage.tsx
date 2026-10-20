@@ -1,6 +1,5 @@
 import { useMemo } from 'react'
 import { Link } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
 import { Alert, Card, Col, Empty, Flex, Row, Skeleton, Statistic, Steps, Tag, Typography } from 'antd'
 import {
   ApartmentOutlined,
@@ -16,7 +15,6 @@ import dayjs from 'dayjs'
 import { useAuth } from '../auth/useAuth'
 import { useCan } from '../hooks/usePermission'
 import { Personel, Planlayici, Roles, roleLabel } from '../auth/roles'
-import { akademikPersonelApi } from '../api/akademikPersonel'
 import { ANNOUNCEMENT_TYPES, PRIORITIES } from '../api/announcement'
 import type { SinavDetay } from '../api/sinav'
 import { brand } from '../theme'
@@ -26,7 +24,7 @@ import { useDerslikler } from '../features/derslik/queries'
 import { useDbapList } from '../features/dbap/queries'
 import { useBolumler } from '../features/bolum/queries'
 import { useDersler } from '../features/ders/queries'
-import { useAkademikPersoneller } from '../features/akademikPersonel/queries'
+import { useAkademikPersoneller, useOwnPersonel } from '../features/akademikPersonel/queries'
 import { useOgrenciler } from '../features/ogrenci/queries'
 import { useMyDuyurular } from '../features/duyuru/queries'
 import { unassignedDersler } from '../features/dbap/dbapRules'
@@ -173,24 +171,18 @@ function StudentExams() {
 }
 
 function MyDuties() {
-  const { user } = useAuth()
-  const own = useQuery({
-    queryKey: ['akademikPersonel', 'byUser', user?.id],
-    queryFn: () => akademikPersonelApi.getByUserId(user!.id),
-    enabled: !!user,
-    retry: false,
-  })
+  const own = useOwnPersonel()
   const start = formatDateParam(today())
   const end = formatDateParam(today().add(14, 'day'))
   const { data, isLoading } = useSinavlar(start, end)
   const { data: dbap } = useDbapList()
   const derslikAd = useDerslikAdlari()
 
-  const personelId = own.data?.id
+  const personelId = own.personel?.id
   // Personel kaydı olmayan planlayıcı (ör. sistem yöneticisi) kendi görevleri yerine yaklaşan tüm sınavları görür
   const isPlanlayici = useCan(Planlayici)
   const [bolumFilter] = useDefaultBolumFilter()
-  const showAll = own.isError && isPlanlayici
+  const showAll = own.noRecord && isPlanlayici
   const dbapPersonel = useMemo(() => new Map((dbap ?? []).map((x) => [x.id, x.akademikPersonelId])), [dbap])
   const mine = useMemo(
     () =>
@@ -247,7 +239,7 @@ function MyDuties() {
       }
       style={cardStyle}
     >
-      {own.isError ? (
+      {own.noRecord ? (
         <Typography.Text type="secondary">Hesabınıza bağlı akademik personel kaydı yok; kişisel görev listesi gösterilemiyor.</Typography.Text>
       ) : isLoading || own.isLoading ? (
         <Skeleton active />

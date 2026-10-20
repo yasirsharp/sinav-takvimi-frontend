@@ -7,12 +7,10 @@ import interactionPlugin from '@fullcalendar/interaction'
 import trLocale from '@fullcalendar/core/locales/tr'
 import type { DateSelectArg, DatesSetArg, EventClickArg, EventDropArg, EventInput } from '@fullcalendar/core'
 import type { EventResizeDoneArg } from '@fullcalendar/interaction'
-import { useQuery } from '@tanstack/react-query'
 import { Alert, App, Button, Card, Dropdown, Flex, Grid, Select, Switch, Typography } from 'antd'
 import { DownloadOutlined, PlusOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
 import type { SinavDetay } from '../../api/sinav'
-import { akademikPersonelApi } from '../../api/akademikPersonel'
 import { downloadReport, type ReportType } from '../../api/report'
 import { getErrorMessage } from '../../api/errors'
 import PageHeader from '../../components/PageHeader'
@@ -20,11 +18,12 @@ import BolumSelect from '../../components/BolumSelect'
 import { useAuth } from '../../auth/useAuth'
 import { useCan } from '../../hooks/usePermission'
 import { useDefaultBolumFilter } from '../../hooks/useDefaultBolumFilter'
-import { Personel, Planlayici, Roles } from '../../auth/roles'
+import { Personel, Planlayici } from '../../auth/roles'
 import { compareTr, matchesSearch } from '../../utils/search'
 import { useDbapList } from '../dbap/queries'
 import { useDerslikler } from '../derslik/queries'
 import { useDeleteSinav, useSaveSinav, useSinavlar } from './queries'
+import { useOwnPersonel } from '../akademikPersonel/queries'
 import { bolumRengi, formatDateParam, formatTimeParam, hasGozetmen, toDateTime } from './sinavUtils'
 import SinavFormModal, { type SinavFormDefaults } from './SinavFormModal'
 import SinavDetailDrawer from './SinavDetailDrawer'
@@ -69,14 +68,7 @@ export default function SinavTakvimiPage() {
   const etkinBolumFilter = useMemo(() => (isPersonel ? bolumFilter : user?.bolumIds ?? []), [isPersonel, bolumFilter, user])
 
   // "Sadece benim sınavlarım": dersini verdiğim veya gözetmen olduğum sınavlar
-  const { data: benimKaydim } = useQuery({
-    queryKey: ['akademikPersonel', 'me', user?.id],
-    queryFn: () => akademikPersonelApi.getByUserId(user!.id),
-    // Yönetici hesaplarının genelde akademik personel kaydı yoktur; gereksiz 404'ü önlemek için sadece personel rollerinde sorulur
-    enabled: !!user && user.roles.some((r) => r === Roles.AkademikPersonel || r === Roles.BolumGorevlisi || r === Roles.GorevliPersonel),
-    retry: false,
-    staleTime: Infinity,
-  })
+  const { personel: benimKaydim } = useOwnPersonel()
 
   const dbapPersonel = useMemo(() => new Map((dbapList ?? []).map((x) => [x.id, x.akademikPersonelId])), [dbapList])
   const dbapKod = useMemo(() => new Map((dbapList ?? []).map((x) => [x.id, x.dersKodu])), [dbapList])
