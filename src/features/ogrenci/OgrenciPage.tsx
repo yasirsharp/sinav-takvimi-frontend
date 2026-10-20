@@ -16,6 +16,8 @@ import { Yonetici } from '../../auth/roles'
 import { compareTr, matchesSearch } from '../../utils/search'
 import { useBolumler } from '../bolum/queries'
 import { useCreateOgrenci, useDeleteOgrenci, useOgrenciler, useUpdateOgrenci } from './queries'
+import ImportButton from '../import/ImportButton'
+import { useOgrenciImport } from '../import/definitions'
 
 const SINIFLAR = [1, 2, 3, 4, 5, 6]
 
@@ -31,6 +33,7 @@ interface FormValues {
 
 export default function OgrenciPage() {
   const canEdit = useCan(Yonetici)
+  const importDefinition = useOgrenciImport()
   const { data, isLoading, error } = useOgrenciler()
   const { data: bolumler } = useBolumler()
   const deleteOgrenci = useDeleteOgrenci()
@@ -109,9 +112,12 @@ export default function OgrenciPage() {
         description="Öğrenciler sistemde sadece kendi bölümlerinin sınav takvimini görür. Kullanıcı adı öğrenci numarasıdır."
         actions={
           canEdit && (
-            <Button type="primary" icon={<PlusOutlined />} onClick={() => setEditing(null)}>
-              Yeni öğrenci
-            </Button>
+            <>
+              <ImportButton definition={importDefinition} />
+              <Button type="primary" icon={<PlusOutlined />} onClick={() => setEditing(null)}>
+                Yeni öğrenci
+              </Button>
+            </>
           )
         }
       />

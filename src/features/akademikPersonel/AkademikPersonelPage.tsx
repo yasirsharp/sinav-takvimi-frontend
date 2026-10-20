@@ -15,6 +15,8 @@ import { parseTemporaryCredentials } from '../../utils/tempPassword'
 import CredentialsModal, { type CredentialsInfo } from '../../components/CredentialsModal'
 import type { CreatedAccount } from '../../api/account'
 import { useAkademikPersoneller, useDeleteAkademikPersonel, useSaveAkademikPersonel } from './queries'
+import ImportButton from '../import/ImportButton'
+import { usePersonelImport } from '../import/definitions'
 
 /** Yaygın akademik unvanlar (serbest giriş de yapılabilir) */
 const UNVANLAR = [
@@ -29,6 +31,7 @@ const UNVANLAR = [
 
 export default function AkademikPersonelPage() {
   const canEdit = useCan(Yonetici)
+  const importDefinition = usePersonelImport()
   const { message } = App.useApp()
   const { data, isLoading, error } = useAkademikPersoneller()
   const deletePersonel = useDeleteAkademikPersonel()
@@ -98,9 +101,12 @@ export default function AkademikPersonelPage() {
         description="Sınavlarda dersin sorumlusu veya gözetmen olarak atanabilecek personel."
         actions={
           canEdit && (
-            <Button type="primary" icon={<PlusOutlined />} onClick={() => setEditing(null)}>
-              Yeni personel
-            </Button>
+            <>
+              <ImportButton definition={importDefinition} />
+              <Button type="primary" icon={<PlusOutlined />} onClick={() => setEditing(null)}>
+                Yeni personel
+              </Button>
+            </>
           )
         }
       />

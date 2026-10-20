@@ -13,9 +13,12 @@ import { Yonetici } from '../../auth/roles'
 import { compareTr, matchesSearch } from '../../utils/search'
 import { useBolumler, useDeleteBolum, useSaveBolum } from './queries'
 import BolumGorevliPanel from './BolumGorevliPanel'
+import ImportButton from '../import/ImportButton'
+import { useBolumImport } from '../import/definitions'
 
 export default function BolumPage() {
   const canEdit = useCan(Yonetici)
+  const importDefinition = useBolumImport()
   const { data, isLoading, error } = useBolumler()
   const deleteBolum = useDeleteBolum()
   const [search, setSearch] = useState('')
@@ -61,9 +64,12 @@ export default function BolumPage() {
         description="Bölümler ve bölüm görevlileri. Görevlileri görmek için satırı genişletin."
         actions={
           canEdit && (
-            <Button type="primary" icon={<PlusOutlined />} onClick={() => setEditing(null)}>
-              Yeni bölüm
-            </Button>
+            <>
+              <ImportButton definition={importDefinition} />
+              <Button type="primary" icon={<PlusOutlined />} onClick={() => setEditing(null)}>
+                Yeni bölüm
+              </Button>
+            </>
           )
         }
       />

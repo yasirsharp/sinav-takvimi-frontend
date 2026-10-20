@@ -14,9 +14,12 @@ import { useDefaultBolumFilter } from '../../hooks/useDefaultBolumFilter'
 import { Planlayici } from '../../auth/roles'
 import { compareTr, matchesSearch } from '../../utils/search'
 import { useDeleteDerslik, useDerslikler, useSaveDerslik } from './queries'
+import ImportButton from '../import/ImportButton'
+import { useDerslikImport } from '../import/definitions'
 
 export default function DerslikPage() {
   const canEdit = useCan(Planlayici)
+  const importDefinition = useDerslikImport()
   const { data, isLoading, error } = useDerslikler()
   const deleteDerslik = useDeleteDerslik()
   const [search, setSearch] = useState('')
@@ -114,9 +117,12 @@ export default function DerslikPage() {
         description={`Sınavların yapılabileceği derslikler. Listelenen aktif dersliklerin toplam kapasitesi: ${totalKapasite.toLocaleString('tr-TR')}`}
         actions={
           canEdit && (
-            <Button type="primary" icon={<PlusOutlined />} onClick={() => setEditing(null)}>
-              Yeni derslik
-            </Button>
+            <>
+              <ImportButton definition={importDefinition} />
+              <Button type="primary" icon={<PlusOutlined />} onClick={() => setEditing(null)}>
+                Yeni derslik
+              </Button>
+            </>
           )
         }
       />

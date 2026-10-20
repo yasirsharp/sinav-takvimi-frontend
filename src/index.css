@@ -40,3 +40,8 @@ body {
 .du-row-passive td {
   color: rgba(0, 0, 0, 0.45);
 }
+
+/* İçe aktarma önizlemesinde hatalı satırlar */
+.du-row-error td {
+  background: #fff4f4;
+}

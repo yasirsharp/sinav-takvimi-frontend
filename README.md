@@ -77,6 +77,23 @@ src/
 - Yetkisi olmayan kullanıcı ekleme/düzenleme/silme düğmelerini görmez; asıl kontrol backend'dedir.
 - Silinemeyen kayıtlarda (ör. ilişkili ders-bölüm-personel eşleştirmesi) backend'in mesajı olduğu gibi gösterilir.
 
+### Excel'den içe aktarma
+
+Bölümler, Derslikler, Dersler, Akademik Personel, Ders Atamaları ve Öğrenciler sayfalarında **Excel'den aktar**
+(sadece ekleme yetkisi olanlara):
+
+1. **Dosya:** Excel (.xlsx) veya CSV şablonu indirilir. Sütun başlıkları büyük/küçük harf ve Türkçe karakter
+   farkı gözetmeden eşleşir; fazla sütunlar yok sayılır.
+2. **Önizleme:** her satır doğrulanır. Boş/yanlış alanlar, sistemde zaten kayıtlı olanlar (bölüm adı, derslik
+   adı, ders kodu, öğrenci no, aynı atama), bulunamayan bölüm/ders/personel ve dosyada tekrar eden satırlar
+   işaretlenir. Hatalı satırlar aktarılmaz.
+3. **Sonuç:** satır satır sonuç ve CSV olarak indirilebilen rapor. Personel ve öğrencide rapor kullanıcı adlarını
+   ve **geçici parolaları** içerir; bu bilgiler bir daha gösterilmez.
+
+Öğrenci ve personel backend'in toplu uçlarıyla (200'er satırlık parçalar), diğerleri satır satır kaydedilir.
+Excel/CSV kütüphaneleri (read-excel-file, write-excel-file, papaparse; MIT) sadece sihirbaz kullanılınca indirilir.
+Önerilen veri giriş sırası: bölümler → derslikler → dersler → akademik personel → ders atamaları → öğrenciler.
+
 ### Yönetim
 
 - **Kullanıcılar** (Yonetici): ad, kullanıcı adı veya e-postayla arama; rol ve durum filtresi; düzenleme,
@@ -178,4 +195,5 @@ Menüdeki rol kontrolü sadece kullanıcı deneyimi içindir; asıl yetki kontro
 - [x] Sınav takvimi: haftalık/aylık/liste görünüm, çakışma uyarılı ekleme/düzenleme, sürükle-bırak, PDF raporlar
 - [x] Müsaitlik takvimi
 - [x] Kullanıcı yönetimi (roller, parola sıfırlama), öğrenciler, duyurular
+- [x] Excel/CSV ile toplu içe aktarma
 - [ ] Bildirim zili, duyuru açılır penceresi, role göre ana sayfa

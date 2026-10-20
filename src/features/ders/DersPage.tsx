@@ -15,9 +15,12 @@ import { Planlayici } from '../../auth/roles'
 import { compareTr, matchesSearch } from '../../utils/search'
 import { DERS_KODU_PATTERN as KOD_PATTERN, normalizeDersKodu } from '../../utils/dersKodu'
 import { useDeleteDers, useDersler, useSaveDers } from './queries'
+import ImportButton from '../import/ImportButton'
+import { useDersImport } from '../import/definitions'
 
 export default function DersPage() {
   const canEdit = useCan(Planlayici)
+  const importDefinition = useDersImport()
   const { data, isLoading, error } = useDersler()
   const deleteDers = useDeleteDers()
   const [search, setSearch] = useState('')
@@ -94,9 +97,12 @@ export default function DersPage() {
         description="Ders kodları ve dersin verildiği bölümler. Bölümü olmayan dersler ortak derstir."
         actions={
           canEdit && (
-            <Button type="primary" icon={<PlusOutlined />} onClick={() => setEditing(null)}>
-              Yeni ders
-            </Button>
+            <>
+              <ImportButton definition={importDefinition} />
+              <Button type="primary" icon={<PlusOutlined />} onClick={() => setEditing(null)}>
+                Yeni ders
+              </Button>
+            </>
           )
         }
       />

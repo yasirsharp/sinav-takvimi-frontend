@@ -17,9 +17,12 @@ import { useDersler } from '../ders/queries'
 import { useAkademikPersoneller } from '../akademikPersonel/queries'
 import { useDbapList, useDeleteDbap, useSaveDbap } from './queries'
 import { derslerForBolum, isDuplicateDbap, unassignedDersler } from './dbapRules'
+import ImportButton from '../import/ImportButton'
+import { useDbapImport } from '../import/definitions'
 
 export default function DbapPage() {
   const canEdit = useCan(Planlayici)
+  const importDefinition = useDbapImport()
   const { data, isLoading, error } = useDbapList()
   const { data: dersler } = useDersler()
   const { data: personeller } = useAkademikPersoneller()
@@ -114,9 +117,12 @@ export default function DbapPage() {
         description="Hangi dersi hangi bölümde hangi öğretim elemanının verdiği. Sınavlar bu atamalar üzerinden eklenir."
         actions={
           canEdit && (
-            <Button type="primary" icon={<PlusOutlined />} onClick={() => setEditing(null)}>
-              Yeni atama
-            </Button>
+            <>
+              <ImportButton definition={importDefinition} />
+              <Button type="primary" icon={<PlusOutlined />} onClick={() => setEditing(null)}>
+                Yeni atama
+              </Button>
+            </>
           )
         }
       />
