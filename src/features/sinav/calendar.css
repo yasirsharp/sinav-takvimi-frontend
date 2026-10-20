@@ -1,0 +1,58 @@
+/* FullCalendar'ı duzce.edu.tr temasına uyarlar */
+.du-calendar {
+  --fc-border-color: #e6e9ee;
+  --fc-today-bg-color: rgba(51, 204, 204, 0.08);
+  --fc-button-bg-color: #ffffff;
+  --fc-button-text-color: #003366;
+  --fc-button-border-color: #d3d3d3;
+  --fc-button-hover-bg-color: #e8f4fb;
+  --fc-button-hover-border-color: #208fc7;
+  --fc-button-active-bg-color: #003366;
+  --fc-button-active-border-color: #003366;
+  --fc-now-indicator-color: #33cccc;
+  font-family: inherit;
+}
+
+.du-calendar .fc-toolbar-title {
+  color: #003366;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.du-calendar .fc-button {
+  font-weight: 600;
+  text-transform: none;
+  box-shadow: none !important;
+}
+
+.du-calendar .fc-button-primary:not(:disabled).fc-button-active {
+  color: #ffffff;
+}
+
+.du-calendar .fc-col-header-cell-cushion,
+.du-calendar .fc-daygrid-day-number,
+.du-calendar .fc-list-day-text,
+.du-calendar .fc-list-day-side-text {
+  color: #003366;
+  text-decoration: none;
+}
+
+.du-calendar .fc-event {
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.du-calendar .fc-timegrid-event .fc-event-main {
+  padding: 2px 4px;
+  line-height: 1.25;
+}
+
+@media (max-width: 575px) {
+  .du-calendar .fc-header-toolbar {
+    flex-direction: column;
+    gap: 8px;
+  }
+  .du-calendar .fc-toolbar-title {
+    font-size: 1.05rem;
+  }
+}

@@ -53,7 +53,7 @@ src/
               unwrap (success=false → hata) ve kaynak başına tipli API modülleri
   auth/       token saklama, JWT çözme, roller, AuthProvider, ProtectedRoute
   components/ PageHeader, TableToolbar, BolumSelect, DeleteButton (onaylı silme)
-  features/   ekranlar: bolum, ders, derslik, akademikPersonel, dbap (sayfa + React Query hook'ları)
+  features/   ekranlar: bolum, ders, derslik, akademikPersonel, dbap, sinav (sayfa + React Query hook'ları)
   hooks/      useCan (rol kontrolü), useDefaultBolumFilter
   layout/     ana iskelet, navigation.tsx (menü/rota tanımları), lazyPages.ts (kod bölme)
   pages/      Login, Ana Sayfa, 403, 404, "yakında" sayfası
@@ -75,6 +75,24 @@ src/
 - Bölüm görevlisi, Ders ve Derslik sayfalarını kendi bölümleriyle filtrelenmiş olarak açar (filtre değiştirilebilir).
 - Yetkisi olmayan kullanıcı ekleme/düzenleme/silme düğmelerini görmez; asıl kontrol backend'dedir.
 - Silinemeyen kayıtlarda (ör. ilişkili ders-bölüm-personel eşleştirmesi) backend'in mesajı olduğu gibi gösterilir.
+
+### Sınav takvimi
+
+`/sinav-takvimi` — FullCalendar 6 (MIT lisanslı `daygrid`, `timegrid`, `list`, `interaction` eklentileri) ile:
+
+- **Görünümler:** Hafta (08:00–22:00 saat ızgarası), Ay ve Liste. Telefonda liste görünümüyle açılır.
+- **Filtreler:** bölüm (bölüm görevlisi için varsayılan kendi bölümleri), derslik, "Sadece benim sınavlarım"
+  (dersini verdiğim veya gözetmen olduğum). Öğrenciler yalnızca kendi bölümlerinin sınavlarını görür.
+- Sınavlar bölüme göre renklenir; tıklayınca derslik, kapasite ve gözetmen bilgileri açılır.
+- **Planlama (Planlayici):** "Yeni sınav" veya takvimde saat aralığı seçerek ekleme; düzenleme, silme;
+  sınavı sürükleyerek başka gün/saate taşıma veya süresini uzatma (çakışma varsa backend reddeder, sınav eski
+  yerine döner).
+- **Sınav formu:** bölüm → ders ataması (dersi veren öğretim elemanıyla), tarih, saat aralığı, birden fazla
+  derslik ve her derslik için gözetmen. Toplam kapasite gösterilir. Aynı gündeki sınavlara göre **canlı çakışma
+  uyarısı** verir (derslik dolu, gözetmen başka sınavda, dersin öğretim elemanı başka sınavda). Müsaitlik
+  takviminde o saatte müsait olmadığını bildiren personel gözetmen olarak seçilemez.
+- **PDF raporlar:** resmi sınav takvimi, gözetmen görevlendirme ve derslik kullanımı; görünen tarih aralığı
+  ve seçili bölümler için backend'den indirilir.
 
 ### Tema
 
@@ -123,6 +141,6 @@ Menüdeki rol kontrolü sadece kullanıcı deneyimi içindir; asıl yetki kontro
 - [x] Giriş, oturum yönetimi, rol bazlı menü ve ana iskelet
 - [x] Tanım ekranları: Bölüm (görevli atama dahil), Ders, Derslik, Akademik Personel
 - [x] Ders atamaları (ders–bölüm–öğretim elemanı)
-- [ ] Sınav takvimi: liste, takvim görünümü, çakışma uyarılı ekleme/düzenleme, PDF raporlar
+- [x] Sınav takvimi: haftalık/aylık/liste görünüm, çakışma uyarılı ekleme/düzenleme, sürükle-bırak, PDF raporlar
 - [ ] Müsaitlik takvimi
 - [ ] Kullanıcı ve yetki yönetimi, duyurular, bildirimler

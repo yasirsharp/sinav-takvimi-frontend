@@ -13,7 +13,7 @@ import {
   SolutionOutlined,
 } from '@ant-design/icons'
 import { Personel, Yonetici } from '../auth/roles'
-import { AkademikPersonelPage, BolumPage, DbapPage, DersPage, DerslikPage } from './lazyPages'
+import { AkademikPersonelPage, BolumPage, DbapPage, DersPage, DerslikPage, SinavTakvimiPage } from './lazyPages'
 
 export interface NavItem {
   path: string
@@ -44,7 +44,7 @@ export function isGroup(entry: NavEntry): entry is NavGroup {
  */
 export const navigation: NavEntry[] = [
   { path: '/', label: 'Ana Sayfa', icon: <HomeOutlined /> },
-  { path: '/sinav-takvimi', label: 'Sınav Takvimi', icon: <CalendarOutlined /> },
+  { path: '/sinav-takvimi', label: 'Sınav Takvimi', icon: <CalendarOutlined />, element: <SinavTakvimiPage /> },
   {
     key: 'tanimlar',
     label: 'Tanımlar',
