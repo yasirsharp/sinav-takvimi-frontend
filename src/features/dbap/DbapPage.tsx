@@ -19,6 +19,7 @@ import { useDbapList, useDeleteDbap, useSaveDbap } from './queries'
 import { derslerForBolum, isDuplicateDbap, unassignedDersler } from './dbapRules'
 import ImportButton from '../import/ImportButton'
 import { useDbapImport } from '../import/definitions'
+import { useResetFormOnOpen } from '../../hooks/useResetFormOnOpen'
 
 export default function DbapPage() {
   const canEdit = useCan(Planlayici)
@@ -207,6 +208,7 @@ interface DbapFormModalProps {
 
 function DbapFormModal({ dbap, existing, personelOptions, defaultBolumId, onClose }: DbapFormModalProps) {
   const [form] = Form.useForm<DbapFormValues>()
+  useResetFormOnOpen(form, dbap !== undefined, dbap?.id)
   const { message } = App.useApp()
   const save = useSaveDbap()
   const { data: dersler, isLoading: derslerLoading } = useDersler()

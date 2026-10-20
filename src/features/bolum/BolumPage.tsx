@@ -15,6 +15,7 @@ import { useBolumler, useDeleteBolum, useSaveBolum } from './queries'
 import BolumGorevliPanel from './BolumGorevliPanel'
 import ImportButton from '../import/ImportButton'
 import { useBolumImport } from '../import/definitions'
+import { useResetFormOnOpen } from '../../hooks/useResetFormOnOpen'
 
 export default function BolumPage() {
   const canEdit = useCan(Yonetici)
@@ -98,6 +99,7 @@ function BolumFormModal({ bolum, onClose }: { bolum: Bolum | null | undefined; o
   const { message } = App.useApp()
   const save = useSaveBolum()
   const open = bolum !== undefined
+  useResetFormOnOpen(form, open, bolum?.id)
 
   const handleFinish = async ({ ad }: { ad: string }) => {
     try {

@@ -17,6 +17,7 @@ import type { CreatedAccount } from '../../api/account'
 import { useAkademikPersoneller, useDeleteAkademikPersonel, useSaveAkademikPersonel } from './queries'
 import ImportButton from '../import/ImportButton'
 import { usePersonelImport } from '../import/definitions'
+import { useResetFormOnOpen } from '../../hooks/useResetFormOnOpen'
 
 /** Yaygın akademik unvanlar (serbest giriş de yapılabilir) */
 const UNVANLAR = [
@@ -150,6 +151,7 @@ interface PersonelFormModalProps {
 
 function PersonelFormModal({ personel, onClose, onCreated }: PersonelFormModalProps) {
   const [form] = Form.useForm<AkademikPersonelFormValues>()
+  useResetFormOnOpen(form, personel !== undefined, personel?.id)
   const { message } = App.useApp()
   const save = useSaveAkademikPersonel()
 

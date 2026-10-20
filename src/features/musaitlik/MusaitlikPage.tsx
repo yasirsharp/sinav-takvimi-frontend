@@ -43,6 +43,7 @@ import { useAkademikPersoneller } from '../akademikPersonel/queries'
 import { describeHours, describeRecurrence, expandMusaitlik } from './musaitlikUtils'
 import { useDeleteMusaitlik, useMusaitlikler, useSaveMusaitlik } from './queries'
 import '../sinav/calendar.css'
+import { useResetFormOnOpen } from '../../hooks/useResetFormOnOpen'
 
 const NEDENLER = ['Ders', 'Toplantı', 'Yıllık izin', 'Sağlık raporu', 'Görevlendirme', 'Kongre / seminer']
 
@@ -325,6 +326,7 @@ interface MusaitlikFormModalProps {
 
 function MusaitlikFormModal({ personelId, kayit, defaults, onClose, onDelete }: MusaitlikFormModalProps) {
   const [form] = Form.useForm<FormValues>()
+  useResetFormOnOpen(form, kayit !== undefined, kayit?.id ?? defaults)
   const { message } = App.useApp()
   const save = useSaveMusaitlik()
   const tumGun = Form.useWatch('tumGun', form)

@@ -23,6 +23,7 @@ import { Yonetici } from '../../auth/roles'
 import { compareTr, matchesSearch } from '../../utils/search'
 import { useDeleteDuyuru, useManageDuyurular, useSaveDuyuru } from './queries'
 import { announcementState } from './duyuruUtils'
+import { useResetFormOnOpen } from '../../hooks/useResetFormOnOpen'
 
 interface FormValues {
   title: string
@@ -168,6 +169,7 @@ export default function DuyuruPage() {
 
 function DuyuruFormModal({ duyuru, onClose }: { duyuru: Announcement | null | undefined; onClose: () => void }) {
   const [form] = Form.useForm<FormValues>()
+  useResetFormOnOpen(form, duyuru !== undefined, duyuru?.id)
   const { message } = App.useApp()
   const { user } = useAuth()
   const isYonetici = useCan(Yonetici)

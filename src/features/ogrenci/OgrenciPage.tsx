@@ -18,6 +18,7 @@ import { useBolumler } from '../bolum/queries'
 import { useCreateOgrenci, useDeleteOgrenci, useOgrenciler, useUpdateOgrenci } from './queries'
 import ImportButton from '../import/ImportButton'
 import { useOgrenciImport } from '../import/definitions'
+import { useResetFormOnOpen } from '../../hooks/useResetFormOnOpen'
 
 const SINIFLAR = [1, 2, 3, 4, 5, 6]
 
@@ -170,6 +171,7 @@ interface OgrenciFormModalProps {
 
 function OgrenciFormModal({ ogrenci, onClose, onCreated }: OgrenciFormModalProps) {
   const [form] = Form.useForm<FormValues>()
+  useResetFormOnOpen(form, ogrenci !== undefined, ogrenci?.id)
   const { message } = App.useApp()
   const create = useCreateOgrenci()
   const update = useUpdateOgrenci()

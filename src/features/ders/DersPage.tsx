@@ -17,6 +17,7 @@ import { DERS_KODU_PATTERN as KOD_PATTERN, normalizeDersKodu } from '../../utils
 import { useDeleteDers, useDersler, useSaveDers } from './queries'
 import ImportButton from '../import/ImportButton'
 import { useDersImport } from '../import/definitions'
+import { useResetFormOnOpen } from '../../hooks/useResetFormOnOpen'
 
 export default function DersPage() {
   const canEdit = useCan(Planlayici)
@@ -136,6 +137,7 @@ export default function DersPage() {
 
 function DersFormModal({ ders, onClose }: { ders: DersWithBolumler | null | undefined; onClose: () => void }) {
   const [form] = Form.useForm<DersFormValues>()
+  useResetFormOnOpen(form, ders !== undefined, ders?.dersId)
   const { message } = App.useApp()
   const save = useSaveDers()
   const ortakDers = Form.useWatch('ortakDers', form)

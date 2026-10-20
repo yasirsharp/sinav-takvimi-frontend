@@ -32,6 +32,7 @@ import { ROLE_COLORS, ROLE_DESCRIPTIONS, Roles, Yonetici, roleLabel } from '../.
 import { useAuth } from '../../auth/useAuth'
 import { compareTr, matchesSearch } from '../../utils/search'
 import { useDeleteUser, useResetPassword, useRoleList, useToggleRole, useUpdateUser, useUserClaims, useUsers } from './queries'
+import { useResetFormOnOpen } from '../../hooks/useResetFormOnOpen'
 
 type StatusFilter = 'all' | 'active' | 'passive'
 
@@ -239,6 +240,7 @@ export default function UsersPage() {
 
 function UserEditModal({ user, onClose }: { user: UserWithRoles | null; onClose: () => void }) {
   const [form] = Form.useForm<UserUpdateValues>()
+  useResetFormOnOpen(form, !!user, user?.id)
   const { message } = App.useApp()
   const update = useUpdateUser()
 

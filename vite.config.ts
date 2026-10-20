@@ -40,6 +40,8 @@ export default defineConfig(({ mode }) => {
       },
     },
     test: {
+      // e2e/ altındaki Playwright testleri vitest ile çalışmaz
+      include: ['src/**/*.test.{ts,tsx}'],
       environment: 'jsdom',
       setupFiles: ['./src/test/setup.ts'],
       css: false,
