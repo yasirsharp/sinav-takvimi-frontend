@@ -13,6 +13,8 @@ export interface AuthContextValue {
   user: CurrentUser | null
   sessionEndReason: SessionEndReason | null
   login: (identifier: string, password: string) => Promise<void>
+  /** Parolayı değiştirir ve backend'in döndüğü yeni token'la oturumu günceller */
+  changePassword: (currentPassword: string, newPassword: string) => Promise<void>
   logout: () => void
 }
 

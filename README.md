@@ -92,7 +92,8 @@ src/
   uyarısı** verir (derslik dolu, gözetmen başka sınavda, dersin öğretim elemanı başka sınavda). Müsaitlik
   takviminde o saatte müsait olmadığını bildiren personel gözetmen olarak seçilemez.
 - **PDF raporlar:** resmi sınav takvimi, gözetmen görevlendirme ve derslik kullanımı; görünen tarih aralığı
-  ve seçili bölümler için backend'den indirilir.
+  ve seçili bölümler için backend'den indirilir. Öğrenciler sadece kendi bölümlerinin resmi takvimini indirebilir.
+- Öğrenciler sınavları `/api/SinavDetay/daterange-bolum` ucundan alır (bölüm backend'de token'dan belirlenir).
 
 ### Tema
 
@@ -126,6 +127,16 @@ Logo dosyaları `src/assets/` altındadır (`duzce-logo.png`, amblem: `duzce-mar
 
 Yeni bir ekran eklemek için `src/layout/navigation.tsx` dosyasına öğe eklemek yeterlidir; menü ve rota oradan üretilir.
 Menüdeki rol kontrolü sadece kullanıcı deneyimi içindir; asıl yetki kontrolü backend'de yapılır.
+
+### Parola
+
+- Yöneticinin açtığı hesaplar ve parolası sıfırlanan hesaplar geçici parolayla gelir (token'da `pwd_change`).
+  Bu kullanıcı hangi sayfayı açarsa açsın `/parola-degistir` sayfasına yönlendirilir; menü gizlenir, sadece
+  çıkış yapabilir. Backend de parola değişene kadar diğer API isteklerini 403 ile reddeder.
+- Parola kuralı backend ile aynıdır (`src/utils/passwordPolicy.ts`): en az 8 karakter, büyük harf, küçük harf,
+  rakam. Kurallar yazarken tek tek işaretlenir.
+- Herkes kullanıcı menüsündeki **Parolamı değiştir** ile parolasını değiştirebilir. Başarılı değişiklikte
+  backend yeni bir token döner.
 
 ### Oturum
 

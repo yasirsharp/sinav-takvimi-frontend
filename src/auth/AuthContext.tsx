@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { setUnauthorizedHandler } from '../api/client'
-import { login as loginRequest } from '../api/auth'
+import { changePassword as changePasswordRequest, login as loginRequest } from '../api/auth'
 import { AuthContext, type SessionEndReason } from './authContext'
 import { isExpired, parseToken, type CurrentUser } from './jwt'
 import { tokenStorage } from './tokenStorage'
@@ -29,8 +29,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logout = useCallback(() => endSession('logout'), [endSession])
   const expire = useCallback(() => endSession('expired'), [endSession])
 
-  const login = useCallback(async (identifier: string, password: string) => {
-    const { token } = await loginRequest(identifier, password)
+  const applyToken = useCallback((token: string) => {
     const parsed = parseToken(token)
     if (!parsed) {
       throw new Error('Sunucudan geçersiz oturum bilgisi alındı.')
@@ -39,6 +38,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setSessionEndReason(null)
     setUser(parsed)
   }, [])
+
+  const login = useCallback(
+    async (identifier: string, password: string) => {
+      const { token } = await loginRequest(identifier, password)
+      applyToken(token)
+    },
+    [applyToken],
+  )
+
+  const changePassword = useCallback(
+    async (currentPassword: string, newPassword: string) => {
+      const { token } = await changePasswordRequest(currentPassword, newPassword)
+      applyToken(token)
+    },
+    [applyToken],
+  )
 
   // Herhangi bir API isteği 401 dönerse oturumu kapat
   useEffect(() => {
@@ -56,8 +71,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [user, expire])
 
   const value = useMemo(
-    () => ({ user, sessionEndReason, login, logout }),
-    [user, sessionEndReason, login, logout],
+    () => ({ user, sessionEndReason, login, logout, changePassword }),
+    [user, sessionEndReason, login, logout, changePassword],
   )
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

@@ -20,3 +20,15 @@ export async function login(identifier: string, password: string): Promise<Acces
   }
   return data.data
 }
+
+/** Parola değiştirir; backend "pwd_change" işareti kaldırılmış yeni bir token döner. */
+export async function changePassword(currentPassword: string, newPassword: string): Promise<AccessToken> {
+  const { data } = await apiClient.post<ApiResult<AccessToken>>('/api/Auth/change-password', {
+    currentPassword,
+    newPassword,
+  })
+  if (!data.success || !data.data?.token) {
+    throw new Error(data.message || 'Parola değiştirilemedi.')
+  }
+  return data.data
+}

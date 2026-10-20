@@ -2,7 +2,7 @@ import { Suspense, useMemo, useState, type CSSProperties } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { Avatar, Button, Drawer, Dropdown, Grid, Layout, Menu, Spin, Typography } from 'antd'
 import type { MenuProps } from 'antd'
-import { DownOutlined, LogoutOutlined, MenuOutlined, UserOutlined } from '@ant-design/icons'
+import { DownOutlined, KeyOutlined, LogoutOutlined, MenuOutlined, UserOutlined } from '@ant-design/icons'
 import { useAuth } from '../auth/useAuth'
 import { hasAnyRole, roleLabel } from '../auth/roles'
 import { isGroup, navigation } from './navigation'
@@ -23,6 +23,8 @@ export default function AppLayout() {
   const [drawerOpen, setDrawerOpen] = useState(false)
 
   const roles = useMemo(() => user?.roles ?? [], [user])
+  // Geçici parolayla giren kullanıcı parolasını değiştirene kadar menü gösterilmez
+  const showMenu = !user?.mustChangePassword
 
   // Sadece kullanıcının rolüne uygun menü öğeleri gösterilir
   const menuItems = useMemo<MenuProps['items']>(
@@ -59,6 +61,12 @@ export default function AppLayout() {
       ),
     },
     { type: 'divider' },
+    {
+      key: 'password',
+      icon: <KeyOutlined />,
+      label: 'Parolamı değiştir',
+      onClick: () => navigate('/parola-degistir'),
+    },
     {
       key: 'logout',
       icon: <LogoutOutlined />,
@@ -100,7 +108,7 @@ export default function AppLayout() {
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
-            {isMobile && (
+            {isMobile && showMenu && (
               <Button
                 type="text"
                 icon={<MenuOutlined style={{ fontSize: 20, color: brand.navy }} />}
@@ -151,7 +159,7 @@ export default function AppLayout() {
         </div>
 
         {/* Ana menü: ince gri ayırıcı, büyük harfli menü, kalın lacivert çizgi */}
-        {!isMobile && (
+        {!isMobile && showMenu && (
           <div style={container}>
             <div style={{ borderTop: `2px solid ${brand.divider}` }}>
               <Menu
@@ -166,7 +174,7 @@ export default function AppLayout() {
             <div style={{ height: 6, background: brand.navy, borderRadius: 3 }} />
           </div>
         )}
-        {isMobile && <div style={{ height: 4, background: brand.navy }} />}
+        {(isMobile || !showMenu) && <div style={{ ...(isMobile ? {} : container), height: isMobile ? 4 : 6 }}><div style={{ height: '100%', background: brand.navy, borderRadius: isMobile ? 0 : 3 }} /></div>}
       </header>
 
       <Drawer

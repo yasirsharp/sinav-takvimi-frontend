@@ -1,6 +1,8 @@
 import { keepPreviousData, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { sinavApi, type SinavFormPayload } from '../../api/sinav'
 import { musaitlikApi } from '../../api/musaitlik'
+import { Personel } from '../../auth/roles'
+import { useCan } from '../../hooks/usePermission'
 
 export const sinavKeys = {
   all: ['sinavlar'] as const,
@@ -9,9 +11,12 @@ export const sinavKeys = {
 
 /** Görünen tarih aralığındaki sınavlar. Takvimde ileri/geri giderken önceki veri ekranda kalır. */
 export function useSinavlar(start: string | null, end: string | null) {
+  // Öğrenciler sadece kendi bölümlerinin sınavlarını alabilir
+  const isPersonel = useCan(Personel)
   return useQuery({
-    queryKey: sinavKeys.range(start ?? '', end ?? ''),
-    queryFn: () => sinavApi.listByDateRange(start!, end!),
+    queryKey: [...sinavKeys.range(start ?? '', end ?? ''), isPersonel ? 'tum' : 'bolumum'],
+    queryFn: () =>
+      isPersonel ? sinavApi.listByDateRange(start!, end!) : sinavApi.listOwnBolumByDateRange(start!, end!),
     enabled: !!start && !!end,
     placeholderData: keepPreviousData,
   })

@@ -1,5 +1,6 @@
 import { Route, Routes } from 'react-router-dom'
-import ProtectedRoute from './auth/ProtectedRoute'
+import ProtectedRoute, { CHANGE_PASSWORD_PATH } from './auth/ProtectedRoute'
+import ChangePasswordPage from './features/account/ChangePasswordPage'
 import AppLayout from './layout/AppLayout'
 import { flattenNavigation } from './layout/navigation'
 import DashboardPage from './pages/DashboardPage'
@@ -18,6 +19,7 @@ export default function App() {
       <Route element={<ProtectedRoute />}>
         <Route element={<AppLayout />}>
           <Route index element={<DashboardPage />} />
+          <Route path={CHANGE_PASSWORD_PATH} element={<ChangePasswordPage />} />
 
           {pages.map((item) => (
             <Route key={item.path} element={<ProtectedRoute roles={item.roles} />}>

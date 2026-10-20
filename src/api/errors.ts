@@ -4,8 +4,9 @@ import type { ApiResult, ValidationErrorResponse } from './types'
 /**
  * Backend hatasını kullanıcıya gösterilecek Türkçe mesaja çevirir.
  * Backend iki farklı biçim döndürür:
- *  - İş kuralı hataları: { success: false, message }          (400)
- *  - Doğrulama hataları: { Message, Errors: [{ ErrorMessage }] } (400)
+ *  - İş kuralı hataları: { success: false, message }                  (400)
+ *  - Doğrulama hataları: { success: false, message, errors: [{ errorMessage }] } (400)
+ *    (eski backend: { Message, Errors: [{ ErrorMessage }] })
  */
 export function getErrorMessage(error: unknown): string {
   if (!isAxiosError(error)) {
@@ -25,13 +26,18 @@ export function getErrorMessage(error: unknown): string {
     return 'Oturumunuzun süresi doldu. Lütfen tekrar giriş yapın.'
   }
   if (status === 403) {
-    return 'Bu işlem için yetkiniz yok.'
+    // Örn. "Devam etmeden önce parolanızı değiştirmeniz gerekiyor." veya super.admin koruması
+    const forbidden = data as Partial<ApiResult> | undefined
+    return forbidden?.message || 'Bu işlem için yetkiniz yok.'
   }
   if (status >= 500) {
     return 'Sunucuda beklenmeyen bir hata oluştu. Lütfen daha sonra tekrar deneyin.'
   }
 
   const validation = data as ValidationErrorResponse | undefined
+  if (validation?.errors?.length) {
+    return [...new Set(validation.errors.map((e) => e.errorMessage))].join(' ')
+  }
   if (validation?.Errors?.length) {
     return validation.Errors.map((e) => e.ErrorMessage).join(' ')
   }

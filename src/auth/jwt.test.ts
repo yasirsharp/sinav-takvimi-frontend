@@ -46,6 +46,11 @@ describe('parseToken', () => {
     expect(user?.roles).toEqual([])
   })
 
+  it('pwd_change claimi varsa parola değiştirme zorunludur', () => {
+    expect(parseToken(makeToken({ [CLAIMS.id]: '1', pwd_change: 'true', exp: futureExp() }))?.mustChangePassword).toBe(true)
+    expect(parseToken(makeToken({ [CLAIMS.id]: '1', exp: futureExp() }))?.mustChangePassword).toBe(false)
+  })
+
   it('bozuk veya eksik tokenda null döner', () => {
     expect(parseToken('gecersiz')).toBeNull()
     expect(parseToken(makeToken({ exp: futureExp() }))).toBeNull()

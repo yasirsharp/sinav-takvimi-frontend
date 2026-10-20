@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom'
 import { describe, expect, it } from 'vitest'
 import { AuthProvider } from './AuthContext'
-import ProtectedRoute from './ProtectedRoute'
+import ProtectedRoute, { CHANGE_PASSWORD_PATH } from './ProtectedRoute'
 import { useAuth } from './useAuth'
 import { tokenStorage } from './tokenStorage'
 import { CLAIMS, futureExp, makeToken } from '../test/tokens'
@@ -76,5 +76,23 @@ describe('ProtectedRoute', () => {
       </MemoryRouter>,
     )
     expect(screen.getByText('login sayfası, dönülecek: /sayfa')).toBeInTheDocument()
+  })
+
+  it('geçici parolalı kullanıcıyı her sayfada parola değiştirme sayfasına yönlendirir', () => {
+    tokenStorage.set(makeToken({ [CLAIMS.id]: '1', [CLAIMS.role]: ['ogrenci'], pwd_change: 'true', exp: futureExp() }))
+    render(
+      <MemoryRouter initialEntries={['/sayfa']}>
+        <AuthProvider>
+          <Routes>
+            <Route element={<ProtectedRoute />}>
+              <Route path="/sayfa" element={<div>korumalı içerik</div>} />
+              <Route path={CHANGE_PASSWORD_PATH} element={<div>parola değiştirme</div>} />
+            </Route>
+          </Routes>
+        </AuthProvider>
+      </MemoryRouter>,
+    )
+    expect(screen.getByText('parola değiştirme')).toBeInTheDocument()
+    expect(screen.queryByText('korumalı içerik')).not.toBeInTheDocument()
   })
 })

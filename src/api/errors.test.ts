@@ -31,6 +31,26 @@ describe('getErrorMessage', () => {
     )
   })
 
+  it('güncel backend doğrulama biçimini (camelCase) okur', () => {
+    const data = {
+      success: false,
+      message: 'Yeni parola mevcut paroladan farklı olmalıdır.',
+      errors: [
+        { propertyName: 'NewPassword', errorMessage: 'Yeni parola mevcut paroladan farklı olmalıdır.' },
+        { propertyName: 'NewPassword', errorMessage: 'Parola en az bir rakam içermelidir.' },
+      ],
+    }
+    expect(getErrorMessage(axiosError(400, data))).toBe(
+      'Yeni parola mevcut paroladan farklı olmalıdır. Parola en az bir rakam içermelidir.',
+    )
+  })
+
+  it('403 yanıtındaki backend mesajını gösterir', () => {
+    expect(
+      getErrorMessage(axiosError(403, { success: false, message: 'Devam etmeden önce parolanızı değiştirmeniz gerekiyor.' })),
+    ).toMatch(/parolanızı değiştirmeniz/)
+  })
+
   it('429, 403 ve 500 için anlaşılır mesaj döner', () => {
     expect(getErrorMessage(axiosError(429, ''))).toMatch(/1 dakika/)
     expect(getErrorMessage(axiosError(403, ''))).toMatch(/yetkiniz yok/)

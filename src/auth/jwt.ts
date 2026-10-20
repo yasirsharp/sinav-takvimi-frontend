@@ -15,6 +15,8 @@ export interface CurrentUser {
   /** Öğrenci için tek bölüm, bölüm görevlisi için birden çok bölüm ("1.BolumId", "2.BolumId"...) */
   bolumIds: number[]
   ogrenciNo?: string
+  /** Geçici parolayla giriş yapıldı: parola değiştirilene kadar diğer sayfalar kapalıdır ("pwd_change" claim'i) */
+  mustChangePassword: boolean
   /** Token bitiş zamanı (ms, epoch) */
   expiresAt: number
 }
@@ -49,6 +51,7 @@ export function parseToken(token: string): CurrentUser | null {
     roles: toStringArray(payload[CLAIM_ROLE]),
     bolumIds,
     ogrenciNo: typeof payload.OgrenciNo === 'string' ? payload.OgrenciNo : undefined,
+    mustChangePassword: payload.pwd_change === 'true' || payload.pwd_change === true,
     expiresAt: payload.exp * 1000,
   }
 }

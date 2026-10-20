@@ -11,8 +11,14 @@ export interface AccessToken {
   expiration: string
 }
 
-/** ExceptionMiddleware'in FluentValidation hatası için döndürdüğü biçim */
+/**
+ * ExceptionMiddleware'in FluentValidation hatası için döndürdüğü biçim.
+ * Güncel backend camelCase döner ({ success, message, errors }); eski sürüm PascalCase dönüyordu.
+ */
 export interface ValidationErrorResponse {
+  success?: false
+  message?: string
+  errors?: { propertyName: string; errorMessage: string }[]
   Message?: string
   StatusCode?: number
   Errors?: { PropertyName: string; ErrorMessage: string }[]

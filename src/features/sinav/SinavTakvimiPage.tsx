@@ -30,10 +30,11 @@ import SinavFormModal, { type SinavFormDefaults } from './SinavFormModal'
 import SinavDetailDrawer from './SinavDetailDrawer'
 import './calendar.css'
 
-const RAPORLAR: { key: ReportType; label: string; dosya: string }[] = [
+/** personelOnly: gözetmen ve derslik raporları personel bilgisi içerir, öğrencilere kapalıdır */
+const RAPORLAR: { key: ReportType; label: string; dosya: string; personelOnly?: boolean }[] = [
   { key: 'official-sinav-report', label: 'Resmi sınav takvimi', dosya: 'Sinav_Takvimi' },
-  { key: 'gozetmen-assignment-report', label: 'Gözetmen görevlendirme', dosya: 'Gozetmen_Atama' },
-  { key: 'derslik-usage-report', label: 'Derslik kullanımı', dosya: 'Derslik_Kullanim' },
+  { key: 'gozetmen-assignment-report', label: 'Gözetmen görevlendirme', dosya: 'Gozetmen_Atama', personelOnly: true },
+  { key: 'derslik-usage-report', label: 'Derslik kullanımı', dosya: 'Derslik_Kullanim', personelOnly: true },
 ]
 
 export default function SinavTakvimiPage() {
@@ -194,7 +195,10 @@ export default function SinavTakvimiPage() {
         actions={
           <>
             <Dropdown
-              menu={{ items: RAPORLAR.map((r) => ({ key: r.key, label: r.label })), onClick: ({ key }) => handleRapor(key as ReportType) }}
+              menu={{
+                items: RAPORLAR.filter((r) => isPersonel || !r.personelOnly).map((r) => ({ key: r.key, label: r.label })),
+                onClick: ({ key }) => handleRapor(key as ReportType),
+              }}
               disabled={!range}
               trigger={['click']}
             >

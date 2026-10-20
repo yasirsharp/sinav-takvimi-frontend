@@ -43,6 +43,16 @@ export const sinavApi = {
         params: { startDate, endDate: `${endDate}T23:59:59` },
       }),
     ),
+  /**
+   * Öğrenci için: kendi bölümünün sınavları. Bölüm backend'de token'dan alınır; öğrenci
+   * /daterange ucuna (tüm bölümler) erişemez.
+   */
+  listOwnBolumByDateRange: (startDate: string, endDate: string) =>
+    unwrapData(
+      apiClient.get<ApiResult<SinavDetay[]>>('/api/SinavDetay/daterange-bolum', {
+        params: { startDate, endDate: `${endDate}T23:59:59` },
+      }),
+    ),
   create: (values: SinavFormPayload) => unwrap(apiClient.post<ApiResult<null>>('/api/SinavDetay', values)),
   update: (id: number, values: SinavFormPayload) =>
     unwrap(apiClient.put<ApiResult<null>>('/api/SinavDetay', { id, ...values })),
