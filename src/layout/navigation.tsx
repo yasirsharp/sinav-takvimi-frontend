@@ -22,6 +22,7 @@ import {
   DersPage,
   DerslikPage,
   DuyuruPage,
+  MusaitlikPage,
   OgrenciPage,
   SinavTakvimiPage,
   UsersPage,
@@ -83,7 +84,7 @@ export const navigation: NavEntry[] = [
       { path: '/tanimlar/ogrenciler', label: 'Öğrenciler', icon: <IdcardOutlined />, roles: Personel, element: <OgrenciPage /> },
     ],
   },
-  { path: '/musaitlik', label: 'Müsaitlik', icon: <ClockCircleOutlined />, roles: Personel },
+  { path: '/musaitlik', label: 'Müsaitlik', icon: <ClockCircleOutlined />, roles: Personel, element: <MusaitlikPage /> },
   {
     key: 'yonetim',
     label: 'Yönetim',

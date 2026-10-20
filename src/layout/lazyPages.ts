@@ -10,3 +10,4 @@ export const SinavTakvimiPage = lazy(() => import('../features/sinav/SinavTakvim
 export const OgrenciPage = lazy(() => import('../features/ogrenci/OgrenciPage'))
 export const UsersPage = lazy(() => import('../features/users/UsersPage'))
 export const DuyuruPage = lazy(() => import('../features/duyuru/DuyuruPage'))
+export const MusaitlikPage = lazy(() => import('../features/musaitlik/MusaitlikPage'))

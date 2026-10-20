@@ -34,6 +34,13 @@ export function getErrorMessage(error: unknown): string {
     return 'Sunucuda beklenmeyen bir hata oluştu. Lütfen daha sonra tekrar deneyin.'
   }
 
+  // ASP.NET Core model doğrulaması (ProblemDetails): { title, errors: { Alan: ["mesaj"] } }
+  const problem = data as { errors?: unknown } | undefined
+  if (problem?.errors && typeof problem.errors === 'object' && !Array.isArray(problem.errors)) {
+    const messages = Object.values(problem.errors as Record<string, unknown>).flat().filter((m): m is string => typeof m === 'string')
+    if (messages.length) return [...new Set(messages)].join(' ')
+  }
+
   const validation = data as ValidationErrorResponse | undefined
   if (validation?.errors?.length) {
     return [...new Set(validation.errors.map((e) => e.errorMessage))].join(' ')

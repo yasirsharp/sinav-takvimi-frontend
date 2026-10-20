@@ -45,6 +45,11 @@ describe('getErrorMessage', () => {
     )
   })
 
+  it('ASP.NET model doğrulama (ProblemDetails) mesajlarını okur', () => {
+    const data = { title: 'One or more validation errors occurred.', errors: { Neden: ['Neden en fazla 100 karakter olabilir.'] } }
+    expect(getErrorMessage(axiosError(400, data))).toBe('Neden en fazla 100 karakter olabilir.')
+  })
+
   it('403 yanıtındaki backend mesajını gösterir', () => {
     expect(
       getErrorMessage(axiosError(403, { success: false, message: 'Devam etmeden önce parolanızı değiştirmeniz gerekiyor.' })),

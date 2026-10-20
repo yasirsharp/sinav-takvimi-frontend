@@ -105,6 +105,19 @@ src/
   ve seçili bölümler için backend'den indirilir. Öğrenciler sadece kendi bölümlerinin resmi takvimini indirebilir.
 - Öğrenciler sınavları `/api/SinavDetay/daterange-bolum` ucundan alır (bölüm backend'de token'dan belirlenir).
 
+### Müsaitlik
+
+`/musaitlik` (Personel): akademik personel kendi kayıtlarını, planlayıcılar seçtikleri personelin kayıtlarını
+yönetir. Hesabına bağlı personel kaydı olmayan kullanıcıya açıklama gösterilir.
+
+- Ay/hafta takvimi ve liste görünümü; listede toplu silme. Takvimde gün veya saat aralığı seçerek kayıt açılır.
+- Kayıt: müsait değil / müsait (tercih), tek sefer / her hafta / her ay, tarih aralığı (tekrarlarda bitiş
+  boşsa süresiz), tüm gün veya saat aralığı, neden ve açıklama.
+- Tekrarlar takvimde istemcide açılır (`musaitlikUtils.ts`); kurallar backend'deki `TarihGecerliMi` ile aynıdır
+  (haftalıkta başlangıç gününün haftanın günü, aylıkta ayın günü; ay kısaysa ayın son günü).
+- "Müsait değil" kaydı olan personel, sınav formunda o saat için gözetmen seçilemez. Sınav formunda müsaitlik
+  takvimine bağlantı vardır.
+
 ### Tema
 
 Görünüm [duzce.edu.tr](https://www.duzce.edu.tr/) ile uyumludur. Renkler sitenin ekran görüntüsünden ve logodan
@@ -163,6 +176,6 @@ Menüdeki rol kontrolü sadece kullanıcı deneyimi içindir; asıl yetki kontro
 - [x] Tanım ekranları: Bölüm (görevli atama dahil), Ders, Derslik, Akademik Personel
 - [x] Ders atamaları (ders–bölüm–öğretim elemanı)
 - [x] Sınav takvimi: haftalık/aylık/liste görünüm, çakışma uyarılı ekleme/düzenleme, sürükle-bırak, PDF raporlar
-- [ ] Müsaitlik takvimi
+- [x] Müsaitlik takvimi
 - [x] Kullanıcı yönetimi (roller, parola sıfırlama), öğrenciler, duyurular
 - [ ] Bildirim zili, duyuru açılır penceresi, role göre ana sayfa

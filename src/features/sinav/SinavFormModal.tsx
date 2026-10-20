@@ -241,7 +241,12 @@ function SinavForm({ sinav, defaults, onClose }: { sinav: SinavDetay | null; def
         </Form.Item>
       </Flex>
 
-      <Typography.Text strong>Derslikler ve gözetmenler</Typography.Text>
+      <Flex justify="space-between" align="baseline" wrap gap={8}>
+        <Typography.Text strong>Derslikler ve gözetmenler</Typography.Text>
+        <Typography.Link href="/musaitlik" target="_blank" style={{ fontSize: 13 }}>
+          Personel müsaitlik takvimi ↗
+        </Typography.Link>
+      </Flex>
       <Form.List name="derslikler" rules={[{ validator: async (_, rows) => { if (!rows?.length) throw new Error('En az bir derslik ekleyin.') } }]}>
         {(fields, { add, remove }, { errors }) => (
           <div style={{ marginTop: 8 }}>
