@@ -178,6 +178,29 @@ Menüdeki rol kontrolü sadece kullanıcı deneyimi içindir; asıl yetki kontro
 - Herkes kullanıcı menüsündeki **Parolamı değiştir** ile parolasını değiştirebilir. Başarılı değişiklikte
   backend yeni bir token döner.
 
+### Ana sayfa, bildirimler, duyurular
+
+- **Ana sayfa role göre değişir:**
+  - Öğrenci: bölümünün önümüzdeki 30 gündeki sınavları (gün gün, "Bugün/Yarın" işaretli).
+  - Akademik personel: 14 gün içinde dersini verdiği ve gözetmen olduğu sınavlar, müsaitlik kısayolu.
+  - Planlayıcı/yönetici: kurulum adımları (tanımlar boşsa), sayılar, öğretim elemanı atanmamış ders ve
+    gözetmensiz derslik uyarıları; personel kaydı yoksa yaklaşan tüm sınavlar.
+  - Herkes: kendisine yönelik yayındaki duyurular.
+- **Bildirim zili:** okunmamış sayısı, son 20 bildirim, tıklayınca ilgili sayfaya gider ve okundu sayılır,
+  "Tümünü okundu say". 60 saniyede bir yenilenir. Backend sınav ekleme/değişiklik/iptalinde öğretim elemanına
+  ve gözetmenlere bildirim üretir.
+- **Açılır duyurular:** "açılır pencere" seçilmiş ve okunmamış duyurular girişte sırayla gösterilir. "Okudum"
+  denince bir daha gösterilmez, "Sonra hatırlat" bir sonraki girişte tekrar gösterir.
+
+### Test dönemi yardımcıları
+
+- **Sorun bildir:** `VITE_FEEDBACK_EMAIL` tanımlıysa alt bilgide ve kullanıcı menüsünde görünür; sayfa adresi,
+  sürüm, roller ve tarayıcı bilgisiyle doldurulmuş bir e-posta açar.
+- **Sürüm:** alt bilgide `package.json` sürümü ve derlemenin commit'i gösterilir (ör. `v0.9.0 (bda1513)`).
+- **Hata sınırı:** bir sayfa çökerse uygulama yerine sadece içerik alanında hata ve "yenile" düğmesi
+  gösterilir. Yeni sürüm yayınlandıktan sonra eski sekmede sayfa parçası yüklenemezse yenileme önerilir.
+- Tarayıcı sekmesi başlığı açık sayfanın adını gösterir.
+
 ### Oturum
 
 - Kullanıcı bilgisi (ad, e-posta, roller, bölüm) JWT'den çözülür; token `localStorage`'da tutulur.
@@ -196,4 +219,4 @@ Menüdeki rol kontrolü sadece kullanıcı deneyimi içindir; asıl yetki kontro
 - [x] Müsaitlik takvimi
 - [x] Kullanıcı yönetimi (roller, parola sıfırlama), öğrenciler, duyurular
 - [x] Excel/CSV ile toplu içe aktarma
-- [ ] Bildirim zili, duyuru açılır penceresi, role göre ana sayfa
+- [x] Bildirim zili, duyuru açılır penceresi, role göre ana sayfa, sorun bildirme

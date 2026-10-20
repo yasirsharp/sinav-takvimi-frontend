@@ -1,11 +1,15 @@
-import { Suspense, useMemo, useState, type CSSProperties } from 'react'
+import { Suspense, useEffect, useMemo, useState, type CSSProperties } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
-import { Avatar, Button, Drawer, Dropdown, Grid, Layout, Menu, Spin, Typography } from 'antd'
+import { Avatar, Button, Drawer, Dropdown, Flex, Grid, Layout, Menu, Spin, Typography } from 'antd'
 import type { MenuProps } from 'antd'
-import { DownOutlined, KeyOutlined, LogoutOutlined, MenuOutlined, UserOutlined } from '@ant-design/icons'
+import { BugOutlined, DownOutlined, KeyOutlined, LogoutOutlined, MenuOutlined, UserOutlined } from '@ant-design/icons'
 import { useAuth } from '../auth/useAuth'
 import { hasAnyRole, roleLabel } from '../auth/roles'
-import { isGroup, navigation } from './navigation'
+import { flattenNavigation, isGroup, navigation } from './navigation'
+import NotificationBell from './NotificationBell'
+import AnnouncementPopup from './AnnouncementPopup'
+import ErrorBoundary from '../components/ErrorBoundary'
+import { appVersionLabel, buildFeedbackMailto, feedbackEmail } from '../utils/appInfo'
 import { brand, currentYear } from '../theme'
 import logoUrl from '../assets/duzce-logo.png'
 
@@ -25,6 +29,22 @@ export default function AppLayout() {
   const roles = useMemo(() => user?.roles ?? [], [user])
   // Geçici parolayla giren kullanıcı parolasını değiştirene kadar menü gösterilmez
   const showMenu = !user?.mustChangePassword
+
+  // Tarayıcı sekmesinde sayfa adı
+  useEffect(() => {
+    const item = flattenNavigation().find((i) => i.path === location.pathname)
+    const label = location.pathname === '/parola-degistir' ? 'Parola değiştir' : item?.label
+    document.title = label && location.pathname !== '/' ? `${label} · Sınav Takvimi` : 'Sınav Takvimi · Düzce Üniversitesi'
+  }, [location.pathname])
+
+  const feedbackHref = feedbackEmail
+    ? buildFeedbackMailto(feedbackEmail, {
+        url: window.location.href,
+        userAgent: navigator.userAgent,
+        roles,
+        userName: user?.email,
+      })
+    : null
 
   // Sadece kullanıcının rolüne uygun menü öğeleri gösterilir
   const menuItems = useMemo<MenuProps['items']>(
@@ -67,6 +87,15 @@ export default function AppLayout() {
       label: 'Parolamı değiştir',
       onClick: () => navigate('/parola-degistir'),
     },
+    ...(feedbackHref
+      ? [
+          {
+            key: 'feedback',
+            icon: <BugOutlined />,
+            label: <a href={feedbackHref}>Sorun bildir</a>,
+          },
+        ]
+      : []),
     {
       key: 'logout',
       icon: <LogoutOutlined />,
@@ -144,6 +173,8 @@ export default function AppLayout() {
             </a>
           </div>
 
+          <Flex align="center" gap={isMobile ? 6 : 10} style={{ flexShrink: 0 }}>
+          {showMenu && user && <NotificationBell userId={user.id} compact={isMobile} />}
           {/* Sitedeki "İLETİŞİM" düğmesi gibi gri çerçeveli, yuvarlak düğme */}
           <Dropdown menu={{ items: userMenu }} trigger={['click']} placement="bottomRight">
             <Button
@@ -156,6 +187,7 @@ export default function AppLayout() {
               <DownOutlined style={{ fontSize: 11 }} />
             </Button>
           </Dropdown>
+          </Flex>
         </div>
 
         {/* Ana menü: ince gri ayırıcı, büyük harfli menü, kalın lacivert çizgi */}
@@ -196,13 +228,22 @@ export default function AppLayout() {
       </Drawer>
 
       <Content style={{ ...container, width: '100%', boxSizing: 'border-box', paddingTop: 24, paddingBottom: 24 }}>
-        <Suspense fallback={<Spin size="large" style={{ display: 'block', margin: '64px auto' }} />}>
-          <Outlet />
-        </Suspense>
+        <ErrorBoundary key={location.pathname}>
+          <Suspense fallback={<Spin size="large" style={{ display: 'block', margin: '64px auto' }} />}>
+            <Outlet />
+          </Suspense>
+        </ErrorBoundary>
+        {showMenu && <AnnouncementPopup />}
       </Content>
 
       <Footer style={{ background: brand.navy, color: 'rgba(255,255,255,0.85)', textAlign: 'center', padding: '16px 24px' }}>
         © {currentYear} Düzce Üniversitesi · Sınav Takvimi Sistemi
+        <span style={{ opacity: 0.6, marginLeft: 8, fontSize: 12 }}>{appVersionLabel}</span>
+        {feedbackHref && (
+          <a href={feedbackHref} style={{ color: '#fff', marginLeft: 12, textDecoration: 'underline' }}>
+            Sorun bildir
+          </a>
+        )}
       </Footer>
     </Layout>
   )

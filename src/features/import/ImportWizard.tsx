@@ -138,7 +138,7 @@ export default function ImportWizard<T>({ open, onClose, definition }: ImportWiz
       open={open}
       onCancel={close}
       width={1100}
-      maskClosable={false}
+      mask={{ closable: false }}
       closable={!running}
       destroyOnHidden
       footer={
