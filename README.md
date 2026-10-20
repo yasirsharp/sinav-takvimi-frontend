@@ -32,10 +32,23 @@ dotnet run
 | `npm run build` | Tip kontrolü + production build (`dist/`) |
 | `npm run lint` | oxlint |
 | `npm test` | Vitest birim testleri |
+| `npm run test:e2e` | Playwright uçtan uca testleri — gerçek backend + boş test veritabanı gerekir ([e2e/README.md](e2e/README.md)) |
+
+CI (`.github/workflows/ci.yml`): lint, tip kontrolü, build ve birim testleri.
+
+## Belgeler
+
+- [docs/TEST_REHBERI.md](docs/TEST_REHBERI.md): test kullanıcıları için rol bazında senaryolar ve sorun bildirme
+- [docs/VERI_GIRISI.md](docs/VERI_GIRISI.md): ilk kurulumda veri giriş sırası ve Excel şablonları
+- Sunucu kurulumu (IIS, veritabanı, ayarlar): backend reposunda `docs/KURULUM.md`
 
 ## Production
 
-Build alırken `VITE_API_BASE_URL` ortam değişkeniyle backend adresi verilir:
+Önerilen kurulum: frontend backend'in `scripts/publish.ps1` betiğiyle derlenip API'nin `wwwroot` klasörüne konur
+ve API ile aynı adresten sunulur (bkz. backend `docs/KURULUM.md`). Bu durumda `VITE_API_BASE_URL` boş kalır.
+Test dönemi için `VITE_FEEDBACK_EMAIL` ile "Sorun bildir" adresi verilebilir.
+
+Frontend ayrı bir sunucudan yayınlanacaksa build alırken `VITE_API_BASE_URL` ile backend adresi verilir:
 
 ```bash
 VITE_API_BASE_URL=https://api.sinav.duzce.edu.tr npm run build
