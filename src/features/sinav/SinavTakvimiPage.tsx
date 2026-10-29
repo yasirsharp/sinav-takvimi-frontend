@@ -194,12 +194,12 @@ export default function SinavTakvimiPage() {
               disabled={!range}
               trigger={['click']}
             >
-              <Button icon={<DownloadOutlined />} loading={raporYukleniyor}>
+              <Button icon={<DownloadOutlined />} loading={raporYukleniyor} data-tour="sinav-report">
                 PDF rapor
               </Button>
             </Dropdown>
             {canEdit && (
-              <Button type="primary" icon={<PlusOutlined />} onClick={() => openNew()}>
+              <Button type="primary" icon={<PlusOutlined />} data-tour="add" onClick={() => openNew()}>
                 Yeni sınav
               </Button>
             )}
@@ -208,7 +208,7 @@ export default function SinavTakvimiPage() {
       />
 
       <Card>
-        <Flex gap={12} wrap style={{ marginBottom: 16 }} align="center">
+        <Flex gap={12} wrap style={{ marginBottom: 16 }} align="center" data-tour="sinav-filters">
           {isPersonel && (
             <BolumSelect
               mode="multiple"
@@ -231,7 +231,7 @@ export default function SinavTakvimiPage() {
             aria-label="Dersliğe göre filtrele"
           />
           {isPersonel && benimKaydim && (
-            <Flex gap={8} align="center">
+            <Flex gap={8} align="center" data-tour="sinav-mine">
               <Switch checked={sadeceBenim} onChange={setSadeceBenim} aria-label="Sadece benim sınavlarım" />
               <Typography.Text>Sadece benim sınavlarım</Typography.Text>
             </Flex>
@@ -240,7 +240,7 @@ export default function SinavTakvimiPage() {
 
         {error && <Alert type="error" showIcon title={getErrorMessage(error)} style={{ marginBottom: 16 }} />}
 
-        <div className="du-calendar" style={{ opacity: isFetching ? 0.6 : 1, transition: 'opacity .2s' }}>
+        <div className="du-calendar" data-tour="sinav-calendar" style={{ opacity: isFetching ? 0.6 : 1, transition: 'opacity .2s' }}>
           <FullCalendar
             ref={calendarRef}
             plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}

@@ -29,6 +29,7 @@ import { useOgrenciler } from '../features/ogrenci/queries'
 import { useMyDuyurular } from '../features/duyuru/queries'
 import { unassignedDersler } from '../features/dbap/dbapRules'
 import { useDefaultBolumFilter } from '../hooks/useDefaultBolumFilter'
+import TourButton from '../tour/TourButton'
 
 const cardStyle = { borderTop: `4px solid ${brand.turquoise}`, height: '100%' }
 
@@ -43,10 +44,13 @@ export default function DashboardPage() {
   return (
     <Row gutter={[16, 16]}>
       <Col span={24}>
-        <Typography.Title level={3} style={{ marginTop: 0, marginBottom: 4, color: brand.navy }}>
-          Hoş geldiniz, {user.name || user.email}
-        </Typography.Title>
-        <Flex gap={4} wrap>
+        <Flex align="center" gap={4} style={{ marginBottom: 4 }}>
+          <Typography.Title level={3} style={{ margin: 0, color: brand.navy }}>
+            Hoş geldiniz, {user.name || user.email}
+          </Typography.Title>
+          <TourButton />
+        </Flex>
+        <Flex gap={4} wrap data-tour="dashboard-roles" style={{ width: 'fit-content' }}>
           {user.roles.length ? (
             user.roles.map((r) => (
               <Tag key={r} color={brand.navy}>
@@ -74,10 +78,10 @@ export default function DashboardPage() {
         </Col>
       )}
 
-      <Col xs={24} lg={14}>
+      <Col xs={24} lg={14} data-tour="dashboard-mine">
         {isOgrenci ? <StudentExams /> : isPersonel ? <MyDuties /> : null}
       </Col>
-      <Col xs={24} lg={isOgrenci || isPersonel ? 10 : 24}>
+      <Col xs={24} lg={isOgrenci || isPersonel ? 10 : 24} data-tour="dashboard-announcements">
         <AnnouncementsCard />
       </Col>
     </Row>
@@ -314,7 +318,7 @@ function PlannerOverview() {
   return (
     <Flex vertical gap={16}>
       {firstMissing >= 0 && (
-        <Card title="Kurulum adımları" style={{ borderTop: `4px solid ${brand.navy}` }}>
+        <Card title="Kurulum adımları" style={{ borderTop: `4px solid ${brand.navy}` }} data-tour="dashboard-setup">
           <Typography.Paragraph type="secondary">
             Sınav planlamaya başlamadan önce tanımları bu sırayla girin. Her ekranda <strong>Excel'den aktar</strong> ile
             toplu giriş yapabilirsiniz.
@@ -324,14 +328,14 @@ function PlannerOverview() {
             current={firstMissing}
             items={steps.map((s, i) => ({
               title: <Link to={s.path}>{s.title}</Link>,
-              description: s.count == null ? '…' : `${s.count} kayıt`,
+              content: s.count == null ? '…' : `${s.count} kayıt`,
               status: s.count ? 'finish' : i === firstMissing ? 'process' : 'wait',
             }))}
           />
         </Card>
       )}
 
-      <Row gutter={[16, 16]}>
+      <Row gutter={[16, 16]} data-tour="dashboard-stats">
         {stats.map((s) => (
           <Col key={s.title} xs={12} sm={8} xl={4}>
             <Link to={s.to}>
@@ -344,7 +348,7 @@ function PlannerOverview() {
       </Row>
 
       {(!!atanmamis || gozetmensiz > 0) && (
-        <Flex vertical gap={8}>
+        <Flex vertical gap={8} data-tour="dashboard-alerts">
           {!!atanmamis && (
             <Alert
               type="warning"

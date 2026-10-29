@@ -12,7 +12,7 @@ interface TableToolbarProps {
 
 export default function TableToolbar({ search, onSearchChange, placeholder = 'Ara…', children }: TableToolbarProps) {
   return (
-    <Flex gap={12} wrap style={{ marginBottom: 16 }}>
+    <Flex gap={12} wrap style={{ marginBottom: 16 }} data-tour="search">
       <Input
         allowClear
         prefix={<SearchOutlined />}

@@ -67,7 +67,7 @@ export default function BolumPage() {
           canEdit && (
             <>
               <ImportButton definition={importDefinition} />
-              <Button type="primary" icon={<PlusOutlined />} onClick={() => setEditing(null)}>
+              <Button type="primary" icon={<PlusOutlined />} data-tour="add" onClick={() => setEditing(null)}>
                 Yeni bölüm
               </Button>
             </>
@@ -75,7 +75,7 @@ export default function BolumPage() {
         }
       />
 
-      <Card>
+      <Card data-tour="table">
         <TableToolbar search={search} onSearchChange={setSearch} placeholder="Bölüm ara…" />
         <Table<Bolum>
           rowKey="id"

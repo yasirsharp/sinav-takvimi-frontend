@@ -13,6 +13,7 @@ import {
   SolutionOutlined,
   IdcardOutlined,
   NotificationOutlined,
+  QuestionCircleOutlined,
 } from '@ant-design/icons'
 import { Personel, Planlayici, Yonetici } from '../auth/roles'
 import {
@@ -22,6 +23,7 @@ import {
   DersPage,
   DerslikPage,
   DuyuruPage,
+  HelpPage,
   MusaitlikPage,
   OgrenciPage,
   SinavTakvimiPage,
@@ -96,6 +98,7 @@ export const navigation: NavEntry[] = [
       { path: '/yonetim/duyurular', label: 'Duyurular', icon: <NotificationOutlined />, roles: Planlayici, element: <DuyuruPage /> },
     ],
   },
+  { path: '/yardim', label: 'Yardım', icon: <QuestionCircleOutlined />, element: <HelpPage /> },
 ]
 
 /** Tüm sayfa öğelerini (grupların içindekiler dahil) düz liste olarak döner */

@@ -43,7 +43,7 @@ export default function ChangePasswordPage() {
   return (
     <>
       <PageHeader title="Parola değiştir" />
-      <Card style={{ maxWidth: 520, borderTop: `6px solid ${brand.navy}` }}>
+      <Card style={{ maxWidth: 520, borderTop: `6px solid ${brand.navy}` }} data-tour="password-form">
         {forced && (
           <Alert
             type="info"
@@ -86,7 +86,7 @@ export default function ChangePasswordPage() {
             <Input.Password prefix={<LockOutlined />} autoComplete="new-password" />
           </Form.Item>
 
-          <Flex vertical gap={2} style={{ marginTop: -8, marginBottom: 16 }} aria-label="Parola kuralları">
+          <Flex vertical gap={2} style={{ marginTop: -8, marginBottom: 16 }} aria-label="Parola kuralları" data-tour="password-rules">
             {checkPassword(newPassword).map((rule) => (
               <Typography.Text key={rule.label} type={rule.ok ? 'success' : 'secondary'} style={{ fontSize: 13 }}>
                 {rule.ok ? <CheckCircleFilled /> : <CloseCircleOutlined />} {rule.label}

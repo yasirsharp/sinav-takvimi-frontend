@@ -11,6 +11,24 @@ sorunları nasıl bildireceğinizi anlatır.
 - İlk girişte yeni bir parola belirlemeniz istenir (en az 8 karakter; büyük harf, küçük harf ve rakam içermeli).
 - Aynı hesapla 5 kez yanlış parola girilirse hesap 15 dakika kilitlenir.
 
+## Tanıtım turu ve yardım
+
+Sistemi daha önce hiç kullanmadıysanız kimseye sormanıza gerek yok:
+
+- **İlk girişte** (parolanızı değiştirdikten sonra) ana sayfada kısa bir **tanıtım turu** açılır. Menüyü,
+  bildirimleri, hesap menüsünü ve ana sayfayı adım adım gösterir. "Turu kapat" veya çarpı ile istediğiniz an
+  kapatabilirsiniz; kapatılan tur bir daha kendiliğinden açılmaz.
+- Bir ekranı **ilk kez açtığınızda** o ekranın turu kendiliğinden başlar (ör. Sınav Takvimi: filtreler, yeni
+  sınav, sürükleyerek taşıma, PDF raporlar).
+- Sayfa başlığının yanındaki turkuaz **?** düğmesi o ekranın turunu istediğiniz zaman tekrar açar.
+- Üst menüdeki **Yardım** (veya sağ üstteki **?** düğmesi) **Yardım merkezi**ni açar. "sınav taşı", "parola
+  sıfırla", "Excel", "müsait değilim" gibi yazarak özelliği bulun; açıklamasını okuyun ya da **Sayfaya git ve
+  turu başlat** ile ekranına gidip adım adım görün. Sık sorulanlar da burada.
+- Hesap menüsündeki **Tanıtım turunu başlat** genel turu yeniden açar. Yardım merkezindeki **Turları yeniden
+  göster** tüm ekran turlarını ilk ziyaretteki gibi tekrar açılır yapar.
+
+Turdaki bir açıklama ekranla uyuşmuyorsa veya bir özelliği yardımda bulamadıysanız bunu da sorun olarak bildirin.
+
 ## Sorun bildirme
 
 Sayfanın altındaki veya kullanıcı menüsündeki **Sorun bildir** bağlantısı, sayfa adresi ve sürüm bilgisi
@@ -20,13 +38,14 @@ doldurulmuş bir e-posta açar. Lütfen:
 2. Ne olmasını beklediğinizi ve ne olduğunu,
 3. Mümkünse ekran görüntüsünü
 
-yazın. Teknik bilgiler bölümünü silmeyin.
+yazın. Teknik bilgiler bölümünü silmeyin. Sayfanın altında yazan sürüm (ör. `v0.9.0 (a1b2c3d)`) hangi sürümü
+denediğinizi gösterir; e-postada otomatik yer alır.
 
 ## Rolünüze göre denenecekler
 
 ### Öğrenci
 
-- [ ] İlk girişte parolanızı değiştirin.
+- [ ] İlk girişte parolanızı değiştirin, açılan tanıtım turunu sonuna kadar izleyin.
 - [ ] Ana sayfada **Yaklaşan sınavlarım** listesini kontrol edin: tarih, saat, derslik doğru mu?
 - [ ] **Sınav Takvimi**: haftalık, aylık ve liste görünümleri; sadece kendi bölümünüzün sınavları görünmeli.
 - [ ] **PDF rapor → Resmi sınav takvimi** indirin.

@@ -145,12 +145,12 @@ export default function DuyuruPage() {
             : 'Kendi bölümünüze yönelik duyurular. Duyurular ana sayfada, açılır pencere seçilirse girişte gösterilir.'
         }
         actions={
-          <Button type="primary" icon={<PlusOutlined />} onClick={() => setEditing(null)}>
+          <Button type="primary" icon={<PlusOutlined />} data-tour="add" onClick={() => setEditing(null)}>
             Yeni duyuru
           </Button>
         }
       />
-      <Card>
+      <Card data-tour="table">
         <TableToolbar search={search} onSearchChange={setSearch} placeholder="Başlık veya içerik ara…" />
         <Table<Announcement>
           rowKey="id"

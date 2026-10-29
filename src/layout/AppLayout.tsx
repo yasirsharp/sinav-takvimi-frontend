@@ -1,8 +1,17 @@
 import { Suspense, useEffect, useMemo, useState, type CSSProperties } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
-import { Avatar, Button, Drawer, Dropdown, Flex, Grid, Layout, Menu, Spin, Typography } from 'antd'
+import { Avatar, Button, Drawer, Dropdown, Flex, Grid, Layout, Menu, Spin, Tooltip, Typography } from 'antd'
 import type { MenuProps } from 'antd'
-import { BugOutlined, DownOutlined, KeyOutlined, LogoutOutlined, MenuOutlined, UserOutlined } from '@ant-design/icons'
+import {
+  BugOutlined,
+  CompassOutlined,
+  DownOutlined,
+  KeyOutlined,
+  LogoutOutlined,
+  MenuOutlined,
+  QuestionCircleOutlined,
+  UserOutlined,
+} from '@ant-design/icons'
 import { useAuth } from '../auth/useAuth'
 import { hasAnyRole, roleLabel } from '../auth/roles'
 import { flattenNavigation, isGroup, navigation } from './navigation'
@@ -11,6 +20,8 @@ import AnnouncementPopup from './AnnouncementPopup'
 import ErrorBoundary from '../components/ErrorBoundary'
 import { appVersionLabel, buildFeedbackMailto, feedbackEmail } from '../utils/appInfo'
 import { brand, currentYear } from '../theme'
+import { useTour } from '../tour/tourContext'
+import { GENEL_TOUR_ID } from '../tour/tourModel'
 import logoUrl from '../assets/duzce-logo.png'
 
 const { Content, Footer } = Layout
@@ -25,6 +36,7 @@ export default function AppLayout() {
   const screens = Grid.useBreakpoint()
   const isMobile = !screens.lg
   const [drawerOpen, setDrawerOpen] = useState(false)
+  const tour = useTour()
 
   const roles = useMemo(() => user?.roles ?? [], [user])
   // Geçici parolayla giren kullanıcı parolasını değiştirene kadar menü gösterilmez
@@ -87,6 +99,22 @@ export default function AppLayout() {
       label: 'Parolamı değiştir',
       onClick: () => navigate('/parola-degistir'),
     },
+    ...(showMenu && tour
+      ? [
+          {
+            key: 'tour',
+            icon: <CompassOutlined />,
+            label: 'Tanıtım turunu başlat',
+            onClick: () => tour.start(GENEL_TOUR_ID),
+          },
+          {
+            key: 'help',
+            icon: <QuestionCircleOutlined />,
+            label: 'Yardım merkezi',
+            onClick: () => navigate('/yardim'),
+          },
+        ]
+      : []),
     ...(feedbackHref
       ? [
           {
@@ -142,6 +170,7 @@ export default function AppLayout() {
                 type="text"
                 icon={<MenuOutlined style={{ fontSize: 20, color: brand.navy }} />}
                 aria-label="Menüyü aç"
+                data-tour="menu"
                 onClick={() => setDrawerOpen(true)}
               />
             )}
@@ -174,12 +203,30 @@ export default function AppLayout() {
           </div>
 
           <Flex align="center" gap={isMobile ? 6 : 10} style={{ flexShrink: 0 }}>
-          {showMenu && user && <NotificationBell userId={user.id} compact={isMobile} />}
+          {showMenu && (
+            <Tooltip title="Yardım: özellikleri arayın, turları başlatın">
+              <Button
+                shape="circle"
+                size={isMobile ? 'middle' : 'large'}
+                icon={<QuestionCircleOutlined style={{ color: brand.navy }} />}
+                aria-label="Yardım"
+                data-tour="help"
+                onClick={() => navigate('/yardim')}
+                style={{ borderColor: '#d3d3d3' }}
+              />
+            </Tooltip>
+          )}
+          {showMenu && user && (
+            <span data-tour="bell" style={{ display: 'inline-flex' }}>
+              <NotificationBell userId={user.id} compact={isMobile} />
+            </span>
+          )}
           {/* Sitedeki "İLETİŞİM" düğmesi gibi gri çerçeveli, yuvarlak düğme */}
           <Dropdown menu={{ items: userMenu }} trigger={['click']} placement="bottomRight">
             <Button
               shape="round"
               size="large"
+              data-tour="user-menu"
               style={{ borderColor: '#d3d3d3', color: brand.navy, flexShrink: 0, paddingInline: isMobile ? 8 : 16 }}
             >
               <Avatar size="small" icon={<UserOutlined />} style={{ background: brand.navy }} />
@@ -193,7 +240,7 @@ export default function AppLayout() {
         {/* Ana menü: ince gri ayırıcı, büyük harfli menü, kalın lacivert çizgi */}
         {!isMobile && showMenu && (
           <div style={container}>
-            <div style={{ borderTop: `2px solid ${brand.divider}` }}>
+            <div style={{ borderTop: `2px solid ${brand.divider}` }} data-tour="menu">
               <Menu
                 className="du-main-menu"
                 mode="horizontal"
@@ -240,7 +287,7 @@ export default function AppLayout() {
         © {currentYear} Düzce Üniversitesi · Sınav Takvimi Sistemi
         <span style={{ opacity: 0.6, marginLeft: 8, fontSize: 12 }}>{appVersionLabel}</span>
         {feedbackHref && (
-          <a href={feedbackHref} style={{ color: '#fff', marginLeft: 12, textDecoration: 'underline' }}>
+          <a href={feedbackHref} data-tour="feedback" style={{ color: '#fff', marginLeft: 12, textDecoration: 'underline' }}>
             Sorun bildir
           </a>
         )}

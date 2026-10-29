@@ -186,7 +186,7 @@ export default function MusaitlikPage() {
         description="Sınav görevi verilmemesi gereken zamanları işaretleyin. Bu saatlerde gözetmen olarak seçilemezsiniz."
         actions={
           canEdit && personelId != null && (
-            <Button type="primary" icon={<PlusOutlined />} onClick={() => openNew()}>
+            <Button type="primary" icon={<PlusOutlined />} data-tour="add" onClick={() => openNew()}>
               Yeni kayıt
             </Button>
           )
@@ -210,10 +210,12 @@ export default function MusaitlikPage() {
                 filterOption={(input, option) => matchesSearch(input, option?.label as string)}
                 style={{ width: 320, maxWidth: '100%' }}
                 aria-label="Personel"
+                data-tour="musaitlik-personel"
               />
             )}
             {!isPlanlayici && personel && <Typography.Text strong>{`${personel.unvan} ${personel.ad}`}</Typography.Text>}
             <Segmented
+              data-tour="musaitlik-view"
               value={view}
               onChange={(v) => setView(v as 'takvim' | 'liste')}
               options={[
@@ -221,7 +223,7 @@ export default function MusaitlikPage() {
                 { value: 'liste', label: 'Liste' },
               ]}
             />
-            <Flex gap={8} style={{ marginLeft: 'auto' }}>
+            <Flex gap={8} style={{ marginLeft: 'auto' }} data-tour="musaitlik-legend">
               <Tag color="red">Müsait değil</Tag>
               <Tag color="green">Müsait (tercih)</Tag>
             </Flex>
@@ -232,7 +234,7 @@ export default function MusaitlikPage() {
           {personelId == null ? (
             own.isLoading ? <Spin /> : <Empty description="Müsaitliğini görmek istediğiniz personeli seçin." />
           ) : view === 'takvim' ? (
-            <div className="du-calendar">
+            <div className="du-calendar" data-tour="musaitlik-calendar">
               <FullCalendar
                 plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
                 locale={trLocale}

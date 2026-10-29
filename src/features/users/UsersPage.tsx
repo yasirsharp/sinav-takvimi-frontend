@@ -202,12 +202,14 @@ export default function UsersPage() {
               </Flex>
             }
           >
-            <Button icon={<QuestionCircleOutlined />}>Roller hakkında</Button>
+            <Button icon={<QuestionCircleOutlined />} data-tour="users-roles">
+              Roller hakkında
+            </Button>
           </Popover>
         }
       />
 
-      <Card>
+      <Card data-tour="table">
         <TableToolbar search={search} onSearchChange={setSearch} placeholder="Ad, kullanıcı adı veya e-posta ara…">
           <Segmented<StatusFilter>
             value={status}

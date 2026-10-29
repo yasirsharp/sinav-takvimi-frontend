@@ -7,6 +7,7 @@ import DashboardPage from './pages/DashboardPage'
 import LoginPage from './pages/LoginPage'
 import NotFoundPage from './pages/NotFoundPage'
 import PlaceholderPage from './pages/PlaceholderPage'
+import TourProvider from './tour/TourProvider'
 
 // Ana sayfa dışındaki tüm menü sayfaları; bileşeni olmayanlar "yakında" sayfası gösterir
 const pages = flattenNavigation().filter((item) => item.path !== '/')
@@ -17,7 +18,13 @@ export default function App() {
       <Route path="/login" element={<LoginPage />} />
 
       <Route element={<ProtectedRoute />}>
-        <Route element={<AppLayout />}>
+        <Route
+          element={
+            <TourProvider>
+              <AppLayout />
+            </TourProvider>
+          }
+        >
           <Route index element={<DashboardPage />} />
           <Route path={CHANGE_PASSWORD_PATH} element={<ChangePasswordPage />} />
 

@@ -69,7 +69,8 @@ src/
   features/   ekranlar: bolum, ders, derslik, akademikPersonel, dbap, sinav (sayfa + React Query hook'ları)
   hooks/      useCan (rol kontrolü), useDefaultBolumFilter
   layout/     ana iskelet, navigation.tsx (menü/rota tanımları), lazyPages.ts (kod bölme)
-  pages/      Login, Ana Sayfa, 403, 404, "yakında" sayfası
+  pages/      Login, Ana Sayfa, Yardım merkezi, 403, 404, "yakında" sayfası
+  tour/       tanıtım turları: tur kaydı (tours.ts), TourProvider, "?" düğmesi
   utils/      Türkçe arama/sıralama, ders kodu normalizasyonu, geçici parola ayrıştırma
 ```
 
@@ -214,6 +215,23 @@ Menüdeki rol kontrolü sadece kullanıcı deneyimi içindir; asıl yetki kontro
   gösterilir. Yeni sürüm yayınlandıktan sonra eski sekmede sayfa parçası yüklenemezse yenileme önerilir.
 - Tarayıcı sekmesi başlığı açık sayfanın adını gösterir.
 
+### Tanıtım turları ve yardım merkezi
+
+- Turlar ve yardım merkezi tek bir kayıttan üretilir: `src/tour/tours.ts`. Her tur bir sayfaya (`path`) bağlıdır;
+  adımlar sayfadaki `data-tour="…"` niteliklerini (veya `selector` ile bir CSS seçicisini) hedefler. Adımlara
+  `roles` verilirse yalnızca o rollere gösterilir.
+- Hedefi ekranda olmayan adım atlanır (yetki yok, liste boş, mobil düzen). Hedefsiz adım ekranın ortasında açılır.
+- İlk girişte (parola değiştirildikten sonra) ana sayfada genel tur, bir sayfaya ilk girişte o sayfanın turu bir kez
+  kendiliğinden açılır. Girişteki duyuru penceresi kapanana kadar beklenir. "Görüldü" bilgisi tarayıcıda,
+  kullanıcıya göre tutulur (`sinav-takvimi.tour.<kullanıcıId>.<turId>`).
+- Sayfa başlığındaki "?" (`PageHeader` içindeki `TourButton`) sayfanın turunu açar. `<sayfa>?tur=<turId>`
+  bağlantısı da o turu başlatır (yardım merkezi bunu kullanır).
+- `/yardim`: başlık, özet, anahtar kelime ve adım metinlerinde Türkçe arama; sık sorulanlar (`faq`).
+- `localStorage['sinav-takvimi.tour.disabled'] = '1'` turların kendiliğinden açılmasını kapatır (e2e testleri
+  böyle çalışır; tur testi `e2e/07-tur.spec.ts`).
+- **Yeni ekran veya özellik eklerken** `tours.ts`'e turunu/adımını ve hedef öğeye `data-tour` ekleyin. Her menü
+  sayfasının bir turu olduğu birim testte kontrol edilir.
+
 ### Oturum
 
 - Kullanıcı bilgisi (ad, e-posta, roller, bölüm) JWT'den çözülür; token `localStorage`'da tutulur.
@@ -233,3 +251,4 @@ Menüdeki rol kontrolü sadece kullanıcı deneyimi içindir; asıl yetki kontro
 - [x] Kullanıcı yönetimi (roller, parola sıfırlama), öğrenciler, duyurular
 - [x] Excel/CSV ile toplu içe aktarma
 - [x] Bildirim zili, duyuru açılır penceresi, role göre ana sayfa, sorun bildirme
+- [x] Tanıtım turları (ilk giriş, sayfa başına "?") ve aranabilir yardım merkezi

@@ -115,7 +115,7 @@ export default function OgrenciPage() {
           canEdit && (
             <>
               <ImportButton definition={importDefinition} />
-              <Button type="primary" icon={<PlusOutlined />} onClick={() => setEditing(null)}>
+              <Button type="primary" icon={<PlusOutlined />} data-tour="add" onClick={() => setEditing(null)}>
                 Yeni öğrenci
               </Button>
             </>
@@ -123,7 +123,7 @@ export default function OgrenciPage() {
         }
       />
 
-      <Card>
+      <Card data-tour="table">
         <TableToolbar search={search} onSearchChange={setSearch} placeholder="Öğrenci no veya ad ara…">
           <BolumSelect
             mode="multiple"

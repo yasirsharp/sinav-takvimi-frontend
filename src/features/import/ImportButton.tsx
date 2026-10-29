@@ -9,7 +9,7 @@ export default function ImportButton<T>({ definition }: { definition: ImportDefi
   const [open, setOpen] = useState(false)
   return (
     <>
-      <Button icon={<FileExcelOutlined />} onClick={() => setOpen(true)}>
+      <Button icon={<FileExcelOutlined />} onClick={() => setOpen(true)} data-tour="import">
         Excel'den aktar
       </Button>
       <ImportWizard open={open} onClose={() => setOpen(false)} definition={definition} />

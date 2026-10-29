@@ -104,7 +104,7 @@ export default function AkademikPersonelPage() {
           canEdit && (
             <>
               <ImportButton definition={importDefinition} />
-              <Button type="primary" icon={<PlusOutlined />} onClick={() => setEditing(null)}>
+              <Button type="primary" icon={<PlusOutlined />} data-tour="add" onClick={() => setEditing(null)}>
                 Yeni personel
               </Button>
             </>
@@ -112,7 +112,7 @@ export default function AkademikPersonelPage() {
         }
       />
 
-      <Card>
+      <Card data-tour="table">
         <TableToolbar search={search} onSearchChange={setSearch} placeholder="Ad veya unvan ara…" />
         <Table<AkademikPersonel>
           rowKey="id"

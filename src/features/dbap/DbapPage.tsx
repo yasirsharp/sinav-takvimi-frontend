@@ -120,7 +120,7 @@ export default function DbapPage() {
           canEdit && (
             <>
               <ImportButton definition={importDefinition} />
-              <Button type="primary" icon={<PlusOutlined />} onClick={() => setEditing(null)}>
+              <Button type="primary" icon={<PlusOutlined />} data-tour="add" onClick={() => setEditing(null)}>
                 Yeni atama
               </Button>
             </>
@@ -130,6 +130,7 @@ export default function DbapPage() {
 
       {missing.length > 0 && (
         <Alert
+          data-tour="missing"
           type="warning"
           showIcon
           style={{ marginBottom: 16 }}
@@ -154,7 +155,7 @@ export default function DbapPage() {
         />
       )}
 
-      <Card>
+      <Card data-tour="table">
         <TableToolbar search={search} onSearchChange={setSearch} placeholder="Ders, bölüm veya öğretim elemanı ara…">
           <BolumSelect
             mode="multiple"

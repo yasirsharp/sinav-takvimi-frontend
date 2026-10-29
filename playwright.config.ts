@@ -4,6 +4,8 @@ import { defineConfig, devices } from '@playwright/test'
  * Uçtan uca testler GERÇEK backend'e karşı çalışır ve BOŞ bir test veritabanı bekler (bkz. e2e/README.md).
  * Testler sırayla çalışır: kurulum testi sonraki testlerin kullandığı verileri oluşturur.
  */
+const baseURL = process.env.E2E_BASE_URL ?? 'http://localhost:5173'
+
 export default defineConfig({
   testDir: './e2e',
   fullyParallel: false,
@@ -13,7 +15,12 @@ export default defineConfig({
   expect: { timeout: 15_000 },
   reporter: [['list'], ['html', { open: 'never', outputFolder: 'e2e-report' }]],
   use: {
-    baseURL: process.env.E2E_BASE_URL ?? 'http://localhost:5173',
+    baseURL,
+    // Tanıtım turları kendiliğinden açılıp akışları kesmesin (turların testi: 07-tur.spec.ts)
+    storageState: {
+      cookies: [],
+      origins: [{ origin: new URL(baseURL).origin, localStorage: [{ name: 'sinav-takvimi.tour.disabled', value: '1' }] }],
+    },
     locale: 'tr-TR',
     timezoneId: 'Europe/Istanbul',
     trace: 'retain-on-failure',
