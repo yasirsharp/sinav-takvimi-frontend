@@ -15,8 +15,11 @@ import { AuthProvider } from './auth/AuthContext'
 import { theme } from './theme'
 import App from './App'
 import './index.css'
+import { installClientLog } from './bugReport/clientLog'
 
 dayjs.locale('tr')
+// Hata bildirimlerine eklenecek son hatalar uygulama açılır açılmaz toplanmaya başlar
+installClientLog()
 
 const queryClient = new QueryClient({
   defaultOptions: {

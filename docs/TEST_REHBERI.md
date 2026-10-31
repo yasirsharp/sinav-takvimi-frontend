@@ -31,21 +31,28 @@ Turdaki bir açıklama ekranla uyuşmuyorsa veya bir özelliği yardımda bulama
 
 ## Sorun bildirme
 
-Sayfanın altındaki veya kullanıcı menüsündeki **Sorun bildir** bağlantısı, sayfa adresi ve sürüm bilgisi
-doldurulmuş bir e-posta açar. Lütfen:
+Bir hata gördüğünüz anda, **o ekrandayken**:
+
+- **Bilgisayarda:** **Alt + Shift + H** (Mac'te Option + Shift + H) tuşlarına basın,
+- **veya** sağ alttaki **böcek düğmesine** tıklayın,
+- **Telefonda:** telefonu birkaç kez hızlıca **sallayın**. iPhone'da önce hesap menüsünden "Sallayınca hata bildir"i
+  açmanız gerekir (telefon bir kez izin sorar).
+
+Açılan pencerede o anki ekranın görüntüsü hazırdır. Şunları yazıp **Gönder**'e basın:
 
 1. Ne yapmaya çalıştığınızı,
-2. Ne olmasını beklediğinizi ve ne olduğunu,
-3. Mümkünse ekran görüntüsünü
+2. Ne olmasını beklediğinizi ve ne olduğunu.
 
-yazın. Teknik bilgiler bölümünü silmeyin. Sayfanın altında yazan sürüm (ör. `v0.9.0 (a1b2c3d)`) hangi sürümü
-denediğinizi gösterir; e-postada otomatik yer alır.
+Sayfa adresi, sürüm, tarayıcı ve son hata kayıtları otomatik eklenir; size bir bildirim numarası verilir.
+Görüntüde paylaşmak istemediğiniz bir bilgi varsa "Ekran görüntüsünü ekle" anahtarını kapatın. Parola alanları
+görüntüye hiç girmez. Sayfanın altında yazan sürüm (ör. `v0.11.0 (a1b2c3d)`) hangi sürümü denediğinizi gösterir.
 
 ## Rolünüze göre denenecekler
 
 ### Öğrenci
 
 - [ ] İlk girişte parolanızı değiştirin, açılan tanıtım turunu sonuna kadar izleyin.
+- [ ] Bir kez **Alt + Shift + H** (telefonda sallayarak) deneme amaçlı hata bildirimi gönderin.
 - [ ] Ana sayfada **Yaklaşan sınavlarım** listesini kontrol edin: tarih, saat, derslik doğru mu?
 - [ ] **Sınav Takvimi**: haftalık, aylık ve liste görünümleri; sadece kendi bölümünüzün sınavları görünmeli.
 - [ ] **PDF rapor → Resmi sınav takvimi** indirin.

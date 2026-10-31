@@ -8,6 +8,7 @@ import LoginPage from './pages/LoginPage'
 import NotFoundPage from './pages/NotFoundPage'
 import PlaceholderPage from './pages/PlaceholderPage'
 import TourProvider from './tour/TourProvider'
+import BugReportProvider from './bugReport/BugReportProvider'
 
 // Ana sayfa dışındaki tüm menü sayfaları; bileşeni olmayanlar "yakında" sayfası gösterir
 const pages = flattenNavigation().filter((item) => item.path !== '/')
@@ -21,7 +22,9 @@ export default function App() {
         <Route
           element={
             <TourProvider>
-              <AppLayout />
+              <BugReportProvider>
+                <AppLayout />
+              </BugReportProvider>
             </TourProvider>
           }
         >

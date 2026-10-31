@@ -14,10 +14,12 @@ import {
   IdcardOutlined,
   NotificationOutlined,
   QuestionCircleOutlined,
+  BugOutlined,
 } from '@ant-design/icons'
 import { Personel, Planlayici, Yonetici } from '../auth/roles'
 import {
   AkademikPersonelPage,
+  BugReportsPage,
   BolumPage,
   DbapPage,
   DersPage,
@@ -96,6 +98,7 @@ export const navigation: NavEntry[] = [
       { path: '/yonetim/kullanicilar', label: 'Kullanıcılar', icon: <UserOutlined />, roles: Yonetici, element: <UsersPage /> },
       // Bölüm görevlisi kendi bölümüne duyuru yayınlar
       { path: '/yonetim/duyurular', label: 'Duyurular', icon: <NotificationOutlined />, roles: Planlayici, element: <DuyuruPage /> },
+      { path: '/yonetim/hata-bildirimleri', label: 'Hata bildirimleri', icon: <BugOutlined />, roles: Yonetici, element: <BugReportsPage /> },
     ],
   },
   { path: '/yardim', label: 'Yardım', icon: <QuestionCircleOutlined />, element: <HelpPage /> },

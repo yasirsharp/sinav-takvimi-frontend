@@ -115,7 +115,7 @@ export const tours: TourDef[] = [
           'Rolleriniz en üstte yazar.',
           'Parolamı değiştir: parolanızı istediğiniz zaman yenileyebilirsiniz.',
           'Tanıtım turu ve Yardım merkezi: bu turu tekrar başlatır veya yardım sayfasını açar.',
-          'Sorun bildir: hata bulursanız teknik bilgileri hazır bir e-posta açar.',
+          'Sorun bildir: hata bildirimi penceresini açar (aşağıda anlatılıyor).',
           'Çıkış yap: ortak bilgisayarda işiniz bitince mutlaka çıkış yapın.',
         ],
       },
@@ -127,10 +127,15 @@ export const tours: TourDef[] = [
       },
       ...anaSayfaAdimlari,
       {
-        target: 'feedback',
-        title: 'Sorun bildir',
+        target: 'bug-report',
+        title: 'Hata bildir',
         description:
-          'Beklemediğiniz bir şey olursa sayfanın altındaki "Sorun bildir" bağlantısını kullanın. Açılan e-postada sayfa, sürüm ve tarayıcı bilgisi hazırdır; ne yapmaya çalıştığınızı ve ne olduğunu yazmanız yeterli. Ekran görüntüsü eklemek çok yardımcı olur.',
+          'Beklemediğiniz bir şey olursa sağ alttaki böcek düğmesine basın. O anki ekranın görüntüsü alınır; ne yapmaya çalıştığınızı ve ne olduğunu bir iki cümleyle yazıp gönderin. Sayfa, sürüm ve son hata kayıtları otomatik eklenir.',
+        bullets: [
+          'Bilgisayarda her ekranda: Alt + Shift + H (Mac: Option + Shift + H).',
+          'Telefonda: telefonu birkaç kez hızlıca sallayın. iPhone\'da önce hesap menüsünden "Sallayınca hata bildir"i açın.',
+          'Görüntüde kişisel bilgi varsa göndermeden önce görüntü ekini kapatabilirsiniz; parola alanları görüntüye hiç girmez.',
+        ],
       },
       {
         title: 'Hazırsınız',
@@ -532,6 +537,28 @@ export const tours: TourDef[] = [
     ],
   },
   {
+    id: 'hata-bildirimleri',
+    path: '/yonetim/hata-bildirimleri',
+    title: 'Hata bildirimleri',
+    summary: 'Kullanıcıların gönderdiği ekran görüntülü hata bildirimlerini inceleme ve takip etme.',
+    keywords: ['bug', 'hata', 'sorun', 'geri bildirim', 'ekran görüntüsü'],
+    roles: Yonetici,
+    steps: [
+      {
+        title: 'Hata bildirimleri nereden gelir?',
+        description:
+          'Kullanıcılar Alt + Shift + H, telefonu sallama veya sağ alttaki böcek düğmesiyle bildirim gönderir. Her bildirimde açıklama, ekran görüntüsü, sayfa, sürüm, tarayıcı ve son hata kayıtları bulunur. Sunucuda e-posta ayarlandıysa her yeni bildirim ayrıca e-postayla gelir.',
+      },
+      { target: 'search', title: 'Arama ve durum', description: 'Yeni, İnceleniyor, Çözüldü veya Tümü ile süzün; açıklama, kişi veya sayfaya göre arayın.' },
+      {
+        target: 'table',
+        title: 'Ayrıntı ve takip',
+        description:
+          'Bir satıra tıklayınca sağda ayrıntı açılır: ekran görüntüsü (tıklayınca büyür), teknik bilgiler ve istemci günlüğü. Durumu değiştirip not ekleyerek takibini yapın. Menüdeki sayı yeni bildirimleri gösterir.',
+      },
+    ],
+  },
+  {
     id: 'parola',
     path: '/parola-degistir',
     title: 'Parola değiştirme',
@@ -568,8 +595,8 @@ export const faq: FaqItem[] = [
   {
     question: 'Bir hata buldum, nasıl bildiririm?',
     answer:
-      'Sayfanın altındaki veya hesap menüsündeki "Sorun bildir" bağlantısını kullanın. E-postada sayfa adresi, sürüm ve tarayıcı bilgisi hazır gelir; ne yapmaya çalıştığınızı ve ne olduğunu yazın, mümkünse ekran görüntüsü ekleyin.',
-    keywords: ['hata', 'bug', 'geri bildirim', 'sorun'],
+      'Hatayı gördüğünüz ekranda Alt + Shift + H tuşlarına basın, sağ alttaki böcek düğmesine tıklayın veya telefonu birkaç kez hızlıca sallayın. Ekran görüntüsü kendiliğinden eklenir; ne yapmaya çalıştığınızı ve ne olduğunu yazıp Gönder deyin. Size bir bildirim numarası verilir.',
+    keywords: ['hata', 'bug', 'geri bildirim', 'sorun', 'kısayol', 'alt shift h', 'salla', 'ekran görüntüsü'],
   },
   {
     question: 'Sınavı kaydederken "çakışan bir sınav bulunmaktadır" hatası alıyorum.',

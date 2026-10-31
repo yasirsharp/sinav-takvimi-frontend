@@ -1,6 +1,6 @@
 import { Suspense, useEffect, useMemo, useState, type CSSProperties } from 'react'
 import { Outlet, useLocation, useNavigate } from 'react-router-dom'
-import { Avatar, Button, Drawer, Dropdown, Flex, Grid, Layout, Menu, Spin, Tooltip, Typography } from 'antd'
+import { Avatar, Badge, Button, Drawer, Dropdown, Flex, Grid, Layout, Menu, Spin, Tooltip, Typography } from 'antd'
 import type { MenuProps } from 'antd'
 import {
   BugOutlined,
@@ -8,23 +8,29 @@ import {
   DownOutlined,
   KeyOutlined,
   LogoutOutlined,
+  MobileOutlined,
   MenuOutlined,
   QuestionCircleOutlined,
   UserOutlined,
 } from '@ant-design/icons'
 import { useAuth } from '../auth/useAuth'
-import { hasAnyRole, roleLabel } from '../auth/roles'
+import { Yonetici, hasAnyRole, roleLabel } from '../auth/roles'
 import { flattenNavigation, isGroup, navigation } from './navigation'
 import NotificationBell from './NotificationBell'
 import AnnouncementPopup from './AnnouncementPopup'
 import ErrorBoundary from '../components/ErrorBoundary'
-import { appVersionLabel, buildFeedbackMailto, feedbackEmail } from '../utils/appInfo'
+import { appVersionLabel } from '../utils/appInfo'
+import { useBugReport } from '../bugReport/bugReportContext'
+import { BUG_SHORTCUT_LABEL } from '../bugReport/shortcut'
+import { useNewBugReportCount } from '../features/bugReport/queries'
 import { brand, currentYear } from '../theme'
 import { useTour } from '../tour/tourContext'
 import { GENEL_TOUR_ID } from '../tour/tourModel'
 import logoUrl from '../assets/duzce-logo.png'
 
 const { Content, Footer } = Layout
+
+const BUG_REPORTS_PATH = '/yonetim/hata-bildirimleri'
 
 /** duzce.edu.tr'deki gibi ortalanmış içerik genişliği */
 const container: CSSProperties = { maxWidth: 1440, margin: '0 auto', padding: '0 24px' }
@@ -49,14 +55,9 @@ export default function AppLayout() {
     document.title = label && location.pathname !== '/' ? `${label} · Sınav Takvimi` : 'Sınav Takvimi · Düzce Üniversitesi'
   }, [location.pathname])
 
-  const feedbackHref = feedbackEmail
-    ? buildFeedbackMailto(feedbackEmail, {
-        url: window.location.href,
-        userAgent: navigator.userAgent,
-        roles,
-        userName: user?.email,
-      })
-    : null
+  const bugReport = useBugReport()
+  const isYonetici = hasAnyRole(roles, Yonetici)
+  const { data: newBugReports } = useNewBugReportCount(isYonetici && showMenu)
 
   // Sadece kullanıcının rolüne uygun menü öğeleri gösterilir
   const menuItems = useMemo<MenuProps['items']>(
@@ -71,11 +72,22 @@ export default function AppLayout() {
                 label: entry.label,
                 children: entry.children
                   .filter((child) => hasAnyRole(roles, child.roles))
-                  .map((child) => ({ key: child.path, icon: child.icon, label: child.label })),
+                  .map((child) => ({
+                    key: child.path,
+                    icon: child.icon,
+                    label:
+                      child.path === BUG_REPORTS_PATH && newBugReports ? (
+                        <Badge count={newBugReports} size="small" offset={[10, 0]}>
+                          {child.label}
+                        </Badge>
+                      ) : (
+                        child.label
+                      ),
+                  })),
               }
             : { key: entry.path, icon: isMobile ? entry.icon : undefined, label: entry.label },
         ),
-    [roles, isMobile],
+    [roles, isMobile, newBugReports],
   )
 
   const openGroup = navigation.find(
@@ -115,13 +127,24 @@ export default function AppLayout() {
           },
         ]
       : []),
-    ...(feedbackHref
+    ...(showMenu && bugReport
       ? [
           {
             key: 'feedback',
             icon: <BugOutlined />,
-            label: <a href={feedbackHref}>Sorun bildir</a>,
+            label: `Sorun bildir (${BUG_SHORTCUT_LABEL})`,
+            onClick: bugReport.open,
           },
+          ...(bugReport.shakeSupported
+            ? [
+                {
+                  key: 'shake',
+                  icon: <MobileOutlined />,
+                  label: bugReport.shakeEnabled ? 'Sallayınca hata bildir: açık' : 'Sallayınca hata bildir: kapalı',
+                  onClick: () => void bugReport.setShakeEnabled(!bugReport.shakeEnabled),
+                },
+              ]
+            : []),
         ]
       : []),
     {
@@ -286,10 +309,16 @@ export default function AppLayout() {
       <Footer style={{ background: brand.navy, color: 'rgba(255,255,255,0.85)', textAlign: 'center', padding: '16px 24px' }}>
         © {currentYear} Düzce Üniversitesi · Sınav Takvimi Sistemi
         <span style={{ opacity: 0.6, marginLeft: 8, fontSize: 12 }}>{appVersionLabel}</span>
-        {feedbackHref && (
-          <a href={feedbackHref} data-tour="feedback" style={{ color: '#fff', marginLeft: 12, textDecoration: 'underline' }}>
+        {showMenu && bugReport && (
+          <Button
+            type="link"
+            size="small"
+            data-tour="feedback"
+            onClick={bugReport.open}
+            style={{ color: '#fff', marginLeft: 4, textDecoration: 'underline' }}
+          >
             Sorun bildir
-          </a>
+          </Button>
         )}
       </Footer>
     </Layout>

@@ -232,6 +232,17 @@ Menüdeki rol kontrolü sadece kullanıcı deneyimi içindir; asıl yetki kontro
 - **Yeni ekran veya özellik eklerken** `tours.ts`'e turunu/adımını ve hedef öğeye `data-tour` ekleyin. Her menü
   sayfasının bir turu olduğu birim testte kontrol edilir.
 
+### Hata bildirimi
+
+- **Alt + Shift + H** (Mac: Option + Shift + H), sağ alttaki böcek düğmesi, hesap menüsündeki "Sorun bildir" veya
+  telefonu sallama (`src/bugReport/shake.ts`; iOS'ta hesap menüsünden açılır, hareket izni ister) aynı pencereyi açar.
+- Pencere açılmadan önce görünen ekranın görüntüsü `html-to-image` ile alınır (`capture.ts`; parola alanları ve
+  `data-private` işaretli öğeler çizilmez, en fazla ~1,2 MB JPEG). Kullanıcı görüntüyü kaldırabilir.
+- `clientLog.ts` son 30 konsol hatasını, yakalanmamış hatayı ve başarısız API isteğini (sorgu parametresi ve gövde
+  olmadan) tutar; bildirimle gönderilir.
+- `POST /api/BugReport` (multipart) kaydeder; sunucuda SMTP ayarlıysa yöneticilere e-posta gider. Yönetim →
+  **Hata bildirimleri** (`/yonetim/hata-bildirimleri`, Yonetici) listeler; menüde yeni bildirim sayısı görünür.
+
 ### Oturum
 
 - Kullanıcı bilgisi (ad, e-posta, roller, bölüm) JWT'den çözülür; token `localStorage`'da tutulur.
