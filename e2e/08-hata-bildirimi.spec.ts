@@ -51,6 +51,10 @@ test('Alt+Shift+H ile ekran görüntülü hata bildirimi; yönetici inceler ve �
   await page.keyboard.press('Escape')
   await expect(drawer).toBeHidden()
 
+  // SMTP ayarlıysa deneme e-postası gider, değilse nedeni anlatılır
+  await page.getByRole('button', { name: 'Test e-postası gönder' }).click()
+  await expect(page.getByText(/Test e-postası gönderildi|E-posta ayarlı değil/)).toBeVisible({ timeout: 40_000 })
+
   await page.getByText('Çözüldü', { exact: true }).first().click()
   await expect(page.getByRole('row', { name: new RegExp(text.slice(0, 18)) })).toContainText('Çözüldü')
 })

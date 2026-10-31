@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query'
 import { useSearchParams } from 'react-router-dom'
 import { App, Button, Card, Descriptions, Drawer, Empty, Flex, Image, Input, Segmented, Select, Spin, Table, Tag, Typography } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
+import { MailOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
 import { BUG_REPORT_STATES, bugReportApi, type BugReportState, type BugReportSummary } from '../../api/bugReport'
 import { getErrorMessage } from '../../api/errors'
@@ -74,6 +75,7 @@ export default function BugReportsPage() {
       <PageHeader
         title="Hata bildirimleri"
         description={`Kullanıcıların ${BUG_SHORTCUT_LABEL}, telefonu sallama veya "Hata bildir" düğmesiyle gönderdiği bildirimler.`}
+        actions={<TestEmailButton />}
       />
       <Card data-tour="table">
         <TableToolbar search={search} onSearchChange={setSearch} placeholder="Açıklama, kişi veya sayfa ara…">
@@ -106,6 +108,27 @@ export default function BugReportsPage() {
       </Card>
       <BugReportDrawer report={selected} onClose={() => select(null)} />
     </>
+  )
+}
+
+/** SMTP ayarlarını logları okumadan denemek için */
+function TestEmailButton() {
+  const { message } = App.useApp()
+  const [sending, setSending] = useState(false)
+  const send = async () => {
+    setSending(true)
+    try {
+      message.success((await bugReportApi.testEmail()) ?? 'Test e-postası gönderildi.', 6)
+    } catch (err) {
+      message.error(getErrorMessage(err), 12)
+    } finally {
+      setSending(false)
+    }
+  }
+  return (
+    <Button icon={<MailOutlined />} onClick={send} loading={sending}>
+      Test e-postası gönder
+    </Button>
   )
 }
 

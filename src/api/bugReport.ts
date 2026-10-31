@@ -54,5 +54,7 @@ export const bugReportApi = {
   screenshot: async (id: number) => (await apiClient.get<Blob>(`/api/BugReport/${id}/screenshot`, { responseType: 'blob' })).data,
   updateState: (id: number, state: BugReportState, adminNote?: string) =>
     unwrap(apiClient.put<ApiResult<null>>(`/api/BugReport/${id}/state`, { state, adminNote })),
+  /** SMTP ayarını denemek için yöneticilere deneme e-postası (sonuç mesajı döner) */
+  testEmail: async () => (await unwrap(apiClient.post<ApiResult<null>>('/api/BugReport/test-email'))).message,
   remove: (id: number) => unwrap(apiClient.delete<ApiResult<null>>(`/api/BugReport/${id}`)),
 }
