@@ -34,7 +34,7 @@ Turdaki bir açıklama ekranla uyuşmuyorsa veya bir özelliği yardımda bulama
 Bir hata gördüğünüz anda, **o ekrandayken**:
 
 - **Bilgisayarda:** **Alt + Shift + H** (Mac'te Option + Shift + H) tuşlarına basın,
-- **veya** sağ alttaki **böcek düğmesine** tıklayın,
+- **veya** sol alttaki **böcek düğmesine** tıklayın,
 - **Telefonda:** telefonu birkaç kez hızlıca **sallayın**. iPhone'da önce hesap menüsünden "Sallayınca hata bildir"i
   açmanız gerekir (telefon bir kez izin sorar).
 

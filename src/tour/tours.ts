@@ -130,7 +130,7 @@ export const tours: TourDef[] = [
         target: 'bug-report',
         title: 'Hata bildir',
         description:
-          'Beklemediğiniz bir şey olursa sağ alttaki böcek düğmesine basın. O anki ekranın görüntüsü alınır; ne yapmaya çalıştığınızı ve ne olduğunu bir iki cümleyle yazıp gönderin. Sayfa, sürüm ve son hata kayıtları otomatik eklenir.',
+          'Beklemediğiniz bir şey olursa sol alttaki böcek düğmesine basın. O anki ekranın görüntüsü alınır; ne yapmaya çalıştığınızı ve ne olduğunu bir iki cümleyle yazıp gönderin. Sayfa, sürüm ve son hata kayıtları otomatik eklenir.',
         bullets: [
           'Bilgisayarda her ekranda: Alt + Shift + H (Mac: Option + Shift + H).',
           'Telefonda: telefonu birkaç kez hızlıca sallayın. iPhone\'da önce hesap menüsünden "Sallayınca hata bildir"i açın.',
@@ -547,7 +547,7 @@ export const tours: TourDef[] = [
       {
         title: 'Hata bildirimleri nereden gelir?',
         description:
-          'Kullanıcılar Alt + Shift + H, telefonu sallama veya sağ alttaki böcek düğmesiyle bildirim gönderir. Her bildirimde açıklama, ekran görüntüsü, sayfa, sürüm, tarayıcı ve son hata kayıtları bulunur. Sunucuda e-posta ayarlandıysa her yeni bildirim ayrıca e-postayla gelir.',
+          'Kullanıcılar Alt + Shift + H, telefonu sallama veya sol alttaki böcek düğmesiyle bildirim gönderir. Her bildirimde açıklama, ekran görüntüsü, sayfa, sürüm, tarayıcı ve son hata kayıtları bulunur. Sunucuda e-posta ayarlandıysa her yeni bildirim ayrıca e-postayla gelir.',
       },
       { target: 'search', title: 'Arama ve durum', description: 'Yeni, İnceleniyor, Çözüldü veya Tümü ile süzün; açıklama, kişi veya sayfaya göre arayın.' },
       {
@@ -595,7 +595,7 @@ export const faq: FaqItem[] = [
   {
     question: 'Bir hata buldum, nasıl bildiririm?',
     answer:
-      'Hatayı gördüğünüz ekranda Alt + Shift + H tuşlarına basın, sağ alttaki böcek düğmesine tıklayın veya telefonu birkaç kez hızlıca sallayın. Ekran görüntüsü kendiliğinden eklenir; ne yapmaya çalıştığınızı ve ne olduğunu yazıp Gönder deyin. Size bir bildirim numarası verilir.',
+      'Hatayı gördüğünüz ekranda Alt + Shift + H tuşlarına basın, sol alttaki böcek düğmesine tıklayın veya telefonu birkaç kez hızlıca sallayın. Ekran görüntüsü kendiliğinden eklenir; ne yapmaya çalıştığınızı ve ne olduğunu yazıp Gönder deyin. Size bir bildirim numarası verilir.',
     keywords: ['hata', 'bug', 'geri bildirim', 'sorun', 'kısayol', 'alt shift h', 'salla', 'ekran görüntüsü'],
   },
   {

@@ -69,6 +69,8 @@ export default function BugReportModal({ open, screenshot, onClose }: BugReportM
       open={open}
       onCancel={onClose}
       width={640}
+      // Başka bir pencere açıkken basılınca onun üstünde açılsın
+      zIndex={2050}
       okText={sentId ? 'Kapat' : 'Gönder'}
       cancelText="Vazgeç"
       cancelButtonProps={{ style: sentId ? { display: 'none' } : undefined }}

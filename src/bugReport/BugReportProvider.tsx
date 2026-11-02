@@ -10,6 +10,8 @@ import { listenForShake, motionNeedsPermission, requestMotionPermission, support
 import { BUG_SHORTCUT_LABEL, isBugReportShortcut } from './shortcut'
 
 const SHAKE_KEY = 'sinav-takvimi.shake'
+/** antd: Modal/Drawer 1000, Tour 1001, Dropdown/Select 1050, Tooltip 1070; message/notification 2010 */
+const BUG_BUTTON_Z = 2000
 
 function readShakePref(): boolean {
   try {
@@ -119,7 +121,9 @@ export default function BugReportProvider({ children }: { children: ReactNode })
     <BugReportContext.Provider value={value}>
       {children}
       {active && (
-        <Tooltip title={`Hata bildir (${BUG_SHORTCUT_LABEL})`} placement="left">
+        // Her zaman en üstte: açık pencere, çekmece, tur ve açılır menülerin de üstünde (antd mesajlarının altında).
+        // Sol altta durur; pencerelerin Kaydet/Gönder düğmeleri sağdadır, telefonda onları örtmesin.
+        <Tooltip title={`Hata bildir (${BUG_SHORTCUT_LABEL})`} placement="right" zIndex={BUG_BUTTON_Z + 1}>
           <Button
             shape="circle"
             size="large"
@@ -131,12 +135,13 @@ export default function BugReportProvider({ children }: { children: ReactNode })
             onClick={() => void openReport()}
             style={{
               position: 'fixed',
-              right: 16,
+              left: 16,
               bottom: 16,
-              zIndex: 999,
+              zIndex: BUG_BUTTON_Z,
               color: brand.navy,
               borderColor: '#d3d3d3',
-              boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+              background: 'rgba(255,255,255,0.92)',
+              boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
             }}
           />
         </Tooltip>

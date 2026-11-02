@@ -25,10 +25,13 @@ test('Alt+Shift+H ile ekran görüntülü hata bildirimi; yönetici inceler ve �
   await expect(dialog.getByText(/bildiriminiz alındı \(No: \d+\)/)).toBeVisible()
   await dialog.locator('.ant-modal-footer').getByRole('button', { name: 'Kapat' }).click()
 
-  // Köşedeki düğme de aynı pencereyi açar
+  // Köşedeki düğme, açık bir pencerenin üstünde de tıklanabilir ve hata penceresi en üstte açılır
+  await page.getByRole('button', { name: 'Yeni sınav' }).click()
+  await expect(page.getByRole('dialog', { name: 'Yeni sınav' })).toBeVisible()
   await page.getByRole('button', { name: 'Hata bildir' }).click()
   await expect(dialog).toBeVisible({ timeout: 20_000 })
   await dialog.getByRole('button', { name: 'Vazgeç' }).click()
+  await page.getByRole('dialog', { name: 'Yeni sınav' }).getByRole('button', { name: 'Vazgeç' }).click()
 
   // Yönetici ekranı
   await page.goto('/yonetim/hata-bildirimleri')
