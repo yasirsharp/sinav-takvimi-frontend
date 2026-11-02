@@ -18,6 +18,7 @@ import { useDeleteDers, useDersler, useSaveDers } from './queries'
 import ImportButton from '../import/ImportButton'
 import { useDersImport } from '../import/definitions'
 import { useResetFormOnOpen } from '../../hooks/useResetFormOnOpen'
+import { useErrorToast } from '../../bugReport/useErrorToast'
 
 export default function DersPage() {
   const canEdit = useCan(Planlayici)
@@ -139,6 +140,7 @@ function DersFormModal({ ders, onClose }: { ders: DersWithBolumler | null | unde
   const [form] = Form.useForm<DersFormValues>()
   useResetFormOnOpen(form, ders !== undefined, ders?.dersId)
   const { message } = App.useApp()
+  const showError = useErrorToast()
   const save = useSaveDers()
   const ortakDers = Form.useWatch('ortakDers', form)
 
@@ -163,7 +165,7 @@ function DersFormModal({ ders, onClose }: { ders: DersWithBolumler | null | unde
       message.success(ders ? 'Ders güncellendi.' : 'Ders eklendi.')
       onClose()
     } catch (err) {
-      message.error(getErrorMessage(err))
+      showError(err)
     }
   }
 

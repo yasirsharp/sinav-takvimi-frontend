@@ -38,8 +38,11 @@ export default function BugReportProvider({ children }: { children: ReactNode })
   // Her açılışta pencere sıfırdan kurulur (açıklama, günlük, gönderim durumu)
   const [openCount, setOpenCount] = useState(0)
 
-  const openReport = useCallback(async () => {
+  const [initialDescription, setInitialDescription] = useState<string | undefined>()
+
+  const openReport = useCallback(async (description?: string) => {
     if (busy.current) return
+    setInitialDescription(description)
     busy.current = true
     setCapturing(true)
     // Görüntü pencere açılmadan alınır; kullanıcı gördüğü ekranı gönderir
@@ -108,7 +111,7 @@ export default function BugReportProvider({ children }: { children: ReactNode })
     () =>
       active
         ? {
-            open: () => void openReport(),
+            open: (options?: { description?: string }) => void openReport(options?.description),
             shakeEnabled,
             setShakeEnabled,
             shakeSupported,
@@ -146,7 +149,7 @@ export default function BugReportProvider({ children }: { children: ReactNode })
           />
         </Tooltip>
       )}
-      <BugReportModal key={openCount} open={open} screenshot={screenshot} onClose={close} />
+      <BugReportModal key={openCount} open={open} screenshot={screenshot} initialDescription={initialDescription} onClose={close} />
     </BugReportContext.Provider>
   )
 }

@@ -17,6 +17,7 @@ import { useDeleteDerslik, useDerslikler, useSaveDerslik } from './queries'
 import ImportButton from '../import/ImportButton'
 import { useDerslikImport } from '../import/definitions'
 import { useResetFormOnOpen } from '../../hooks/useResetFormOnOpen'
+import { useErrorToast } from '../../bugReport/useErrorToast'
 
 export default function DerslikPage() {
   const canEdit = useCan(Planlayici)
@@ -165,6 +166,7 @@ function DerslikFormModal({
   const [form] = Form.useForm<DerslikFormValues>()
   useResetFormOnOpen(form, derslik !== undefined, derslik?.derslikId)
   const { message } = App.useApp()
+  const showError = useErrorToast()
   const save = useSaveDerslik()
   const ortakDerslik = Form.useWatch('ortakDerslik', form)
 
@@ -185,7 +187,7 @@ function DerslikFormModal({
       message.success(derslik ? 'Derslik güncellendi.' : 'Derslik eklendi.')
       onClose()
     } catch (err) {
-      message.error(getErrorMessage(err))
+      showError(err)
     }
   }
 

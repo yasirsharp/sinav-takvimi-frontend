@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { api, apiLogin, loginAsAdmin } from './helpers'
+import { API, adminToken, api, apiLogin, loginAsAdmin } from './helpers'
 
 test('Alt+Shift+H ile ekran görüntülü hata bildirimi; yönetici inceler ve çözer', async ({ page }) => {
   // Her çalıştırmada benzersiz (tekrar çalıştırmada eski kayıtlarla karışmasın)
@@ -66,4 +66,56 @@ test('hata bildirimleri yalnızca yöneticiye açık; herkes gönderebilir', asy
   const token = await apiLogin('2026100001', 'Ogrenci2026x')
   expect((await api('GET', '/api/BugReport', undefined, token)).status).toBe(403)
   expect((await api('GET', '/api/BugReport/1/screenshot', undefined, token)).status).toBe(403)
+})
+
+test('beklenmeyen sunucu ve sayfa hataları kendiliğinden kaydedilir; tekrar edince sayaç artar', async ({ page }) => {
+  // Sunucu hatası (yalnızca geliştirme ortamındaki test ucu)
+  for (let i = 0; i < 2; i++) {
+    expect((await fetch(`${API}/api/dev/throw?n=${i}`)).status).toBe(500)
+    await new Promise((r) => setTimeout(r, 1200)) // aynı hata saniyede en fazla bir kez yazılır
+  }
+
+  // Sayfada yakalanmamış hata
+  await loginAsAdmin(page)
+  await page.goto('/tanimlar/dersler')
+  await expect(page.getByRole('heading', { name: 'Dersler' })).toBeVisible()
+  await page.evaluate(() =>
+    setTimeout(() => {
+      throw new Error('E2E sayfa hatası 42')
+    }),
+  )
+  await page.waitForTimeout(1500)
+
+  const token = await adminToken()
+  const list = await api<{ source: string; occurrenceCount: number; description: string; pageUrl: string }[]>(
+    'GET',
+    '/api/BugReport',
+    undefined,
+    token,
+  )
+  const sunucu = list.body.data.find((r) => r.source === 'sunucu' && r.pageUrl === 'GET /api/dev/throw')
+  expect(sunucu, 'sunucu hatası kaydı').toBeTruthy()
+  expect(sunucu!.occurrenceCount).toBeGreaterThanOrEqual(2)
+  const sayfa = list.body.data.find((r) => r.source === 'istemci' && r.description.includes('E2E sayfa hatası'))
+  expect(sayfa, 'sayfa hatası kaydı').toBeTruthy()
+
+  // Yönetim ekranında kaynak ve sayaç görünür
+  await page.goto('/yonetim/hata-bildirimleri')
+  const row = page.getByRole('row', { name: /GET \/api\/dev\/throw|NullReferenceException/ }).first()
+  await expect(row).toContainText('Otomatik: sunucu')
+  await expect(row).toContainText(/\d+ kez/)
+})
+
+test('hata mesajındaki "Bu bir hata mı? Bildir" bağlantısı önceden doldurulmuş bildirimi açar', async ({ page }) => {
+  await loginAsAdmin(page)
+  await page.goto('/tanimlar/bolumler')
+  await page.getByRole('button', { name: 'Yeni bölüm' }).click()
+  const form = page.getByRole('dialog', { name: 'Yeni bölüm' })
+  await form.getByLabel('Bölüm adı').fill('Bilgisayar Mühendisliği')
+  await form.getByRole('button', { name: 'Kaydet' }).click()
+  await page.getByText('Bu bir hata mı? Bildir').click()
+  const dialog = page.getByRole('dialog', { name: 'Hata bildir' })
+  await expect(dialog).toBeVisible({ timeout: 20_000 })
+  await expect(dialog.getByLabel('Ne yapıyordunuz, ne oldu?')).toHaveValue(/Ekranda şu hata çıktı: ".+"/)
+  await dialog.getByRole('button', { name: 'Vazgeç' }).click()
 })

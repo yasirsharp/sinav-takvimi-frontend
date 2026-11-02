@@ -1,10 +1,10 @@
 import { useMemo, useState } from 'react'
-import { Alert, App, Button, Flex, Modal, Progress, Result, Steps, Table, Tag, Typography, Upload } from 'antd'
+import { Alert, Button, Flex, Modal, Progress, Result, Steps, Table, Tag, Typography, Upload } from 'antd'
 import type { ColumnsType } from 'antd/es/table'
 import { CheckCircleFilled, CloseCircleFilled, DownloadOutlined, FileExcelOutlined, InboxOutlined } from '@ant-design/icons'
-import { getErrorMessage } from '../../api/errors'
 import { downloadBlob, downloadTemplate, readSpreadsheet, rowsFromMatrix, toCsv, type ImportColumn } from './importUtils'
 import { validateRows, type ImportDefinition, type ImportResult, type ValidatedRow } from './importTypes'
+import { useErrorToast } from '../../bugReport/useErrorToast'
 
 type Step = 'file' | 'preview' | 'result'
 
@@ -15,7 +15,7 @@ interface ImportWizardProps<T> {
 }
 
 export default function ImportWizard<T>({ open, onClose, definition }: ImportWizardProps<T>) {
-  const { message } = App.useApp()
+  const showError = useErrorToast()
   const [step, setStep] = useState<Step>('file')
   const [fileName, setFileName] = useState<string>('')
   const [rows, setRows] = useState<ValidatedRow<T>[]>([])
@@ -51,7 +51,7 @@ export default function ImportWizard<T>({ open, onClose, definition }: ImportWiz
       setRows(validateRows(definition, sheet.rows))
       setStep('preview')
     } catch (err) {
-      message.error(getErrorMessage(err))
+      showError(err)
     }
     return false // Upload bileşeni dosyayı kendisi göndermesin
   }
@@ -71,7 +71,7 @@ export default function ImportWizard<T>({ open, onClose, definition }: ImportWiz
       setResults([...out, ...skipped].sort((a, b) => a.row - b.row))
       setStep('result')
     } catch (err) {
-      message.error(getErrorMessage(err))
+      showError(err)
     } finally {
       setRunning(false)
     }

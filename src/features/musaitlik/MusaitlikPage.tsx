@@ -41,6 +41,7 @@ import { describeHours, describeRecurrence, expandMusaitlik } from './musaitlikU
 import { useDeleteMusaitlik, useMusaitlikler, useSaveMusaitlik } from './queries'
 import '../sinav/calendar.css'
 import { useResetFormOnOpen } from '../../hooks/useResetFormOnOpen'
+import { useErrorToast } from '../../bugReport/useErrorToast'
 
 const NEDENLER = ['Ders', 'Toplantı', 'Yıllık izin', 'Sağlık raporu', 'Görevlendirme', 'Kongre / seminer']
 
@@ -84,6 +85,7 @@ export default function MusaitlikPage() {
   const { data: kayitlar, isLoading, error } = useMusaitlikler(personelId)
   const remove = useDeleteMusaitlik()
   const { message } = App.useApp()
+  const showError = useErrorToast()
 
   const canEdit = isPlanlayici || (own.personel != null && personelId === own.personel.id)
   const personel = personeller?.find((p) => p.id === personelId) ?? own.personel
@@ -118,7 +120,7 @@ export default function MusaitlikPage() {
       message.success(ids.length > 1 ? `${ids.length} kayıt silindi.` : 'Kayıt silindi.')
       setSelectedRowKeys([])
     } catch (err) {
-      message.error(getErrorMessage(err))
+      showError(err)
     }
   }
 
@@ -321,6 +323,7 @@ function MusaitlikFormModal({ personelId, kayit, defaults, onClose, onDelete }: 
   const [form] = Form.useForm<FormValues>()
   useResetFormOnOpen(form, kayit !== undefined, kayit?.id ?? defaults)
   const { message } = App.useApp()
+  const showError = useErrorToast()
   const save = useSaveMusaitlik()
   const tumGun = Form.useWatch('tumGun', form)
   const tekrarTipi = Form.useWatch('tekrarTipi', form)
@@ -364,7 +367,7 @@ function MusaitlikFormModal({ personelId, kayit, defaults, onClose, onDelete }: 
       message.success(kayit ? 'Kayıt güncellendi.' : 'Kayıt eklendi.')
       onClose()
     } catch (err) {
-      message.error(getErrorMessage(err))
+      showError(err)
     }
   }
 

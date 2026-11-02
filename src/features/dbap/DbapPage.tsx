@@ -20,6 +20,7 @@ import { derslerForBolum, isDuplicateDbap, unassignedDersler } from './dbapRules
 import ImportButton from '../import/ImportButton'
 import { useDbapImport } from '../import/definitions'
 import { useResetFormOnOpen } from '../../hooks/useResetFormOnOpen'
+import { useErrorToast } from '../../bugReport/useErrorToast'
 
 export default function DbapPage() {
   const canEdit = useCan(Planlayici)
@@ -211,6 +212,7 @@ function DbapFormModal({ dbap, existing, personelOptions, defaultBolumId, onClos
   const [form] = Form.useForm<DbapFormValues>()
   useResetFormOnOpen(form, dbap !== undefined, dbap?.id)
   const { message } = App.useApp()
+  const showError = useErrorToast()
   const save = useSaveDbap()
   const { data: dersler, isLoading: derslerLoading } = useDersler()
   const bolumId = Form.useWatch('bolumId', form)
@@ -229,7 +231,7 @@ function DbapFormModal({ dbap, existing, personelOptions, defaultBolumId, onClos
       message.success(dbap ? 'Ders ataması güncellendi.' : 'Ders ataması eklendi.')
       onClose()
     } catch (err) {
-      message.error(getErrorMessage(err))
+      showError(err)
     }
   }
 

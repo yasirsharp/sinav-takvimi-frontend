@@ -16,6 +16,7 @@ import BolumGorevliPanel from './BolumGorevliPanel'
 import ImportButton from '../import/ImportButton'
 import { useBolumImport } from '../import/definitions'
 import { useResetFormOnOpen } from '../../hooks/useResetFormOnOpen'
+import { useErrorToast } from '../../bugReport/useErrorToast'
 
 export default function BolumPage() {
   const canEdit = useCan(Yonetici)
@@ -97,6 +98,7 @@ export default function BolumPage() {
 function BolumFormModal({ bolum, onClose }: { bolum: Bolum | null | undefined; onClose: () => void }) {
   const [form] = Form.useForm<{ ad: string }>()
   const { message } = App.useApp()
+  const showError = useErrorToast()
   const save = useSaveBolum()
   const open = bolum !== undefined
   useResetFormOnOpen(form, open, bolum?.id)
@@ -107,7 +109,7 @@ function BolumFormModal({ bolum, onClose }: { bolum: Bolum | null | undefined; o
       message.success(bolum ? 'Bölüm güncellendi.' : 'Bölüm eklendi.')
       onClose()
     } catch (err) {
-      message.error(getErrorMessage(err))
+      showError(err)
     }
   }
 

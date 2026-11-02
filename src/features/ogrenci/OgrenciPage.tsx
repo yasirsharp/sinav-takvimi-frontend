@@ -19,6 +19,7 @@ import { useCreateOgrenci, useDeleteOgrenci, useOgrenciler, useUpdateOgrenci } f
 import ImportButton from '../import/ImportButton'
 import { useOgrenciImport } from '../import/definitions'
 import { useResetFormOnOpen } from '../../hooks/useResetFormOnOpen'
+import { useErrorToast } from '../../bugReport/useErrorToast'
 
 const SINIFLAR = [1, 2, 3, 4, 5, 6]
 
@@ -173,6 +174,7 @@ function OgrenciFormModal({ ogrenci, onClose, onCreated }: OgrenciFormModalProps
   const [form] = Form.useForm<FormValues>()
   useResetFormOnOpen(form, ogrenci !== undefined, ogrenci?.id)
   const { message } = App.useApp()
+  const showError = useErrorToast()
   const create = useCreateOgrenci()
   const update = useUpdateOgrenci()
 
@@ -194,7 +196,7 @@ function OgrenciFormModal({ ogrenci, onClose, onCreated }: OgrenciFormModalProps
       }
       onClose()
     } catch (err) {
-      message.error(getErrorMessage(err))
+      showError(err)
     }
   }
 

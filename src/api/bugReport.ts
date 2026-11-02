@@ -10,6 +10,24 @@ export const BUG_REPORT_STATES: Record<BugReportState, { label: string; color: s
   cozuldu: { label: 'Çözüldü', color: 'green' },
 }
 
+export type BugReportSource = 'kullanici' | 'istemci' | 'sunucu'
+
+export const BUG_REPORT_SOURCES: Record<BugReportSource, { label: string; color: string }> = {
+  kullanici: { label: 'Kullanıcı', color: 'blue' },
+  istemci: { label: 'Otomatik: sayfa', color: 'purple' },
+  sunucu: { label: 'Otomatik: sunucu', color: 'magenta' },
+}
+
+/** Sayfada yakalanan beklenmeyen hata (kendiliğinden gönderilir) */
+export interface ClientError {
+  kind: string
+  message: string
+  stack?: string
+  pageUrl: string
+  appVersion: string
+  viewport: string
+}
+
 export interface BugReportSummary {
   id: number
   userId: number
@@ -22,6 +40,10 @@ export interface BugReportSummary {
   viewport: string
   clientLog?: string | null
   hasScreenshot: boolean
+  /** kullanici: elle; istemci: sayfa hatası; sunucu: beklenmeyen sunucu hatası (ikisi kendiliğinden) */
+  source: BugReportSource
+  occurrenceCount: number
+  lastSeenDate?: string | null
   state: BugReportState
   adminNote?: string | null
   createdDate: string
@@ -49,6 +71,7 @@ export const bugReportApi = {
     // Content-Type'ı tarayıcı (multipart sınırıyla) belirler
     return unwrapData(apiClient.post<ApiResult<number>>('/api/BugReport', form, { headers: { 'Content-Type': undefined } }))
   },
+  auto: (error: ClientError) => unwrap(apiClient.post<ApiResult<number>>('/api/BugReport/auto', error)),
   list: (state?: BugReportState) => unwrapData(apiClient.get<ApiResult<BugReportSummary[]>>('/api/BugReport', { params: { state } })),
   newCount: () => unwrapData(apiClient.get<ApiResult<number>>('/api/BugReport/new-count')),
   screenshot: async (id: number) => (await apiClient.get<Blob>(`/api/BugReport/${id}/screenshot`, { responseType: 'blob' })).data,

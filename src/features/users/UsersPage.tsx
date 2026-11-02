@@ -33,6 +33,7 @@ import { useAuth } from '../../auth/useAuth'
 import { compareTr, matchesSearch } from '../../utils/search'
 import { useDeleteUser, useResetPassword, useRoleList, useToggleRole, useUpdateUser, useUserClaims, useUsers } from './queries'
 import { useResetFormOnOpen } from '../../hooks/useResetFormOnOpen'
+import { useErrorToast } from '../../bugReport/useErrorToast'
 
 type StatusFilter = 'all' | 'active' | 'passive'
 
@@ -41,6 +42,7 @@ const fullName = (u: UserWithRoles) => `${u.firstName} ${u.lastName}`
 export default function UsersPage() {
   const { user: me } = useAuth()
   const { message } = App.useApp()
+  const showError = useErrorToast()
   const { data, isLoading, error } = useUsers()
   const updateUser = useUpdateUser()
   const deleteUser = useDeleteUser()
@@ -73,7 +75,7 @@ export default function UsersPage() {
       })
       message.success(active ? `${fullName(u)} etkinleştirildi.` : `${fullName(u)} pasifleştirildi; giriş yapamaz.`)
     } catch (err) {
-      message.error(getErrorMessage(err))
+      showError(err)
     }
   }
 
@@ -82,7 +84,7 @@ export default function UsersPage() {
       const account = await resetPassword.mutateAsync(u.id)
       setCredentials({ owner: fullName(u), userName: account.userName, password: account.temporaryPassword })
     } catch (err) {
-      message.error(getErrorMessage(err))
+      showError(err)
     }
   }
 
@@ -244,6 +246,7 @@ function UserEditModal({ user, onClose }: { user: UserWithRoles | null; onClose:
   const [form] = Form.useForm<UserUpdateValues>()
   useResetFormOnOpen(form, !!user, user?.id)
   const { message } = App.useApp()
+  const showError = useErrorToast()
   const update = useUpdateUser()
 
   const handleFinish = async (values: UserUpdateValues) => {
@@ -262,7 +265,7 @@ function UserEditModal({ user, onClose }: { user: UserWithRoles | null; onClose:
       message.success('Kullanıcı güncellendi.')
       onClose()
     } catch (err) {
-      message.error(getErrorMessage(err))
+      showError(err)
     }
   }
 
@@ -320,6 +323,7 @@ function RoleModal({
   onClose: () => void
 }) {
   const { message } = App.useApp()
+  const showError = useErrorToast()
   const { data: roles, isLoading: rolesLoading } = useRoleList()
   const { data: claims, isLoading: claimsLoading } = useUserClaims(user?.id ?? null)
   const toggle = useToggleRole()
@@ -333,7 +337,7 @@ function RoleModal({
       await toggle.mutateAsync({ userId: user.id, roleId, claim: checked ? undefined : claim })
       message.success(`${roleLabel(roleName)} rolü ${checked ? 'eklendi' : 'kaldırıldı'}.`)
     } catch (err) {
-      message.error(getErrorMessage(err))
+      showError(err)
     } finally {
       setPendingRole(null)
     }

@@ -133,7 +133,7 @@ export default function AppLayout() {
             key: 'feedback',
             icon: <BugOutlined />,
             label: `Sorun bildir (${BUG_SHORTCUT_LABEL})`,
-            onClick: bugReport.open,
+            onClick: () => bugReport.open(),
           },
           ...(bugReport.shakeSupported
             ? [
@@ -314,7 +314,7 @@ export default function AppLayout() {
             type="link"
             size="small"
             data-tour="feedback"
-            onClick={bugReport.open}
+            onClick={() => bugReport.open()}
             style={{ color: '#fff', marginLeft: 4, textDecoration: 'underline' }}
           >
             Sorun bildir

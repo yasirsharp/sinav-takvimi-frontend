@@ -18,6 +18,7 @@ import { useAkademikPersoneller, useDeleteAkademikPersonel, useSaveAkademikPerso
 import ImportButton from '../import/ImportButton'
 import { usePersonelImport } from '../import/definitions'
 import { useResetFormOnOpen } from '../../hooks/useResetFormOnOpen'
+import { useErrorToast } from '../../bugReport/useErrorToast'
 
 /** Yaygın akademik unvanlar (serbest giriş de yapılabilir) */
 const UNVANLAR = [
@@ -153,6 +154,7 @@ function PersonelFormModal({ personel, onClose, onCreated }: PersonelFormModalPr
   const [form] = Form.useForm<AkademikPersonelFormValues>()
   useResetFormOnOpen(form, personel !== undefined, personel?.id)
   const { message } = App.useApp()
+  const showError = useErrorToast()
   const save = useSaveAkademikPersonel()
 
   const handleFinish = async (values: AkademikPersonelFormValues) => {
@@ -170,7 +172,7 @@ function PersonelFormModal({ personel, onClose, onCreated }: PersonelFormModalPr
       }
       onClose()
     } catch (err) {
-      message.error(getErrorMessage(err))
+      showError(err)
     }
   }
 

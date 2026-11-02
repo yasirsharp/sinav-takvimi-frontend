@@ -24,6 +24,7 @@ import { compareTr, matchesSearch } from '../../utils/search'
 import { useDeleteDuyuru, useManageDuyurular, useSaveDuyuru } from './queries'
 import { announcementState } from './duyuruUtils'
 import { useResetFormOnOpen } from '../../hooks/useResetFormOnOpen'
+import { useErrorToast } from '../../bugReport/useErrorToast'
 
 interface FormValues {
   title: string
@@ -171,6 +172,7 @@ function DuyuruFormModal({ duyuru, onClose }: { duyuru: Announcement | null | un
   const [form] = Form.useForm<FormValues>()
   useResetFormOnOpen(form, duyuru !== undefined, duyuru?.id)
   const { message } = App.useApp()
+  const showError = useErrorToast()
   const { user } = useAuth()
   const isYonetici = useCan(Yonetici)
   const save = useSaveDuyuru()
@@ -215,7 +217,7 @@ function DuyuruFormModal({ duyuru, onClose }: { duyuru: Announcement | null | un
       message.success(duyuru ? 'Duyuru güncellendi.' : 'Duyuru yayınlandı.')
       onClose()
     } catch (err) {
-      message.error(getErrorMessage(err))
+      showError(err)
     }
   }
 

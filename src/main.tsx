@@ -16,10 +16,12 @@ import { theme } from './theme'
 import App from './App'
 import './index.css'
 import { installClientLog } from './bugReport/clientLog'
+import { installAutoReport } from './bugReport/autoReport'
 
 dayjs.locale('tr')
 // Hata bildirimlerine eklenecek son hatalar uygulama açılır açılmaz toplanmaya başlar
 installClientLog()
+installAutoReport()
 
 const queryClient = new QueryClient({
   defaultOptions: {

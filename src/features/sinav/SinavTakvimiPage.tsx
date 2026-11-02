@@ -28,6 +28,7 @@ import { bolumRengi, formatDateParam, formatTimeParam, hasGozetmen, toDateTime }
 import SinavFormModal, { type SinavFormDefaults } from './SinavFormModal'
 import SinavDetailDrawer from './SinavDetailDrawer'
 import './calendar.css'
+import { useErrorToast } from '../../bugReport/useErrorToast'
 
 /** personelOnly: gözetmen ve derslik raporları personel bilgisi içerir, öğrencilere kapalıdır */
 const RAPORLAR: { key: ReportType; label: string; dosya: string; personelOnly?: boolean }[] = [
@@ -39,6 +40,7 @@ const RAPORLAR: { key: ReportType; label: string; dosya: string; personelOnly?: 
 export default function SinavTakvimiPage() {
   const { user } = useAuth()
   const { message } = App.useApp()
+  const showError = useErrorToast()
   const canEdit = useCan(Planlayici)
   const isPersonel = useCan(Personel)
   const screens = Grid.useBreakpoint()
@@ -150,7 +152,7 @@ export default function SinavTakvimiPage() {
       message.success(`Sınav ${dayjs(start).format('DD.MM HH:mm')} saatine taşındı.`)
     } catch (err) {
       arg.revert()
-      message.error(getErrorMessage(err), 6)
+      showError(err, 6)
     }
   }
 
@@ -165,7 +167,7 @@ export default function SinavTakvimiPage() {
         `${rapor.dosya}_${range.start}_${range.end}.pdf`,
       )
     } catch (err) {
-      message.error(getErrorMessage(err))
+      showError(err)
     } finally {
       setRaporYukleniyor(false)
     }
@@ -314,7 +316,7 @@ export default function SinavTakvimiPage() {
             message.success('Sınav silindi.')
             setSelected(null)
           } catch (err) {
-            message.error(getErrorMessage(err))
+            showError(err)
           }
         }}
       />

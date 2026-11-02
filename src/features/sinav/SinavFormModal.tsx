@@ -3,7 +3,6 @@ import { Alert, App, Button, DatePicker, Flex, Form, InputNumber, Modal, Select,
 import { DeleteOutlined, PlusOutlined } from '@ant-design/icons'
 import dayjs, { type Dayjs } from 'dayjs'
 import type { SinavDetay } from '../../api/sinav'
-import { getErrorMessage } from '../../api/errors'
 import BolumSelect from '../../components/BolumSelect'
 import { compareTr, matchesSearch } from '../../utils/search'
 import { useDbapList } from '../dbap/queries'
@@ -11,6 +10,7 @@ import { useDerslikler } from '../derslik/queries'
 import { useAkademikPersoneller } from '../akademikPersonel/queries'
 import { useMesgulPersonel, useSaveSinav, useSinavlar } from './queries'
 import { findCakismalar, formatDateParam, formatTimeParam, hasGozetmen, toDateTime, type Cakisma } from './sinavUtils'
+import { useErrorToast } from '../../bugReport/useErrorToast'
 
 /** Yeni sınav için önceden doldurulacak değerler (takvimde aralık seçince) */
 export interface SinavFormDefaults {
@@ -53,6 +53,7 @@ export default function SinavFormModal({ sinav, defaults, onClose }: SinavFormMo
 function SinavForm({ sinav, defaults, onClose }: { sinav: SinavDetay | null; defaults?: SinavFormDefaults; onClose: () => void }) {
   const [form] = Form.useForm<FormValues>()
   const { message } = App.useApp()
+  const showError = useErrorToast()
   const save = useSaveSinav()
   const { data: dbapList } = useDbapList()
   const { data: derslikler } = useDerslikler()
@@ -184,7 +185,7 @@ function SinavForm({ sinav, defaults, onClose }: { sinav: SinavDetay | null; def
       message.success(sinav ? 'Sınav güncellendi.' : 'Sınav eklendi.')
       onClose()
     } catch (err) {
-      message.error(getErrorMessage(err), 6)
+      showError(err, 6)
     }
   }
 

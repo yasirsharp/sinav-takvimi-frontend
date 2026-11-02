@@ -44,6 +44,10 @@ Açılan pencerede o anki ekranın görüntüsü hazırdır. Şunları yazıp **
 2. Ne olmasını beklediğinizi ve ne olduğunu.
 
 Sayfa adresi, sürüm, tarayıcı ve son hata kayıtları otomatik eklenir; size bir bildirim numarası verilir.
+
+Bir işlem hata mesajıyla sonuçlanırsa mesajın yanındaki **"Bu bir hata mı? Bildir"** bağlantısına tıklayın; pencere
+mesajla önceden doldurulmuş açılır. Sayfa çökmeleri ve beklenmeyen sunucu hataları zaten kendiliğinden kaydedilir;
+yine de ne yaptığınızı bir iki cümleyle bildirmeniz düzeltmeyi hızlandırır.
 Görüntüde paylaşmak istemediğiniz bir bilgi varsa "Ekran görüntüsünü ekle" anahtarını kapatın. Parola alanları
 görüntüye hiç girmez. Sayfanın altında yazan sürüm (ör. `v0.11.0 (a1b2c3d)`) hangi sürümü denediğinizi gösterir.
 

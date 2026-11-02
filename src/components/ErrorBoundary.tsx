@@ -1,5 +1,6 @@
 import { Component, type ErrorInfo, type ReactNode } from 'react'
 import { Button, Result } from 'antd'
+import { reportClientError } from '../bugReport/autoReport'
 
 interface Props {
   children: ReactNode
@@ -28,6 +29,8 @@ export default class ErrorBoundary extends Component<Props, State> {
 
   componentDidCatch(error: Error, info: ErrorInfo) {
     console.error('Sayfa hatası:', error, info.componentStack)
+    // Kullanıcı bildirmese de kaydedilir (yeni sürüm sonrası parça hatası hariç)
+    if (!isChunkLoadError(error)) reportClientError('crash', error, info.componentStack ?? undefined)
   }
 
   render() {
@@ -53,7 +56,7 @@ export default class ErrorBoundary extends Component<Props, State> {
       <Result
         status="error"
         title="Bu sayfa görüntülenirken bir hata oluştu"
-        subTitle="Sayfayı yenilemeyi deneyin. Sorun devam ederse alt bilgideki “Sorun bildir” bağlantısıyla bildirin."
+        subTitle="Sayfayı yenilemeyi deneyin. Hata kaydedildi; ayrıntı eklemek isterseniz sol alttaki böcek düğmesiyle bildirebilirsiniz."
         extra={[
           <Button key="reload" type="primary" onClick={() => window.location.reload()}>
             Sayfayı yenile

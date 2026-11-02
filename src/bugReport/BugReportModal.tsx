@@ -12,11 +12,13 @@ import type { Screenshot } from './capture'
 interface BugReportModalProps {
   open: boolean
   screenshot: Screenshot | null
+  /** "Bu bir hata mı? Bildir" ile açılınca ekrandaki hata mesajı */
+  initialDescription?: string
   onClose: () => void
 }
 
 /** Hata bildirimi penceresi: ekran görüntüsü önizlemesi, açıklama ve otomatik eklenen bilgiler */
-export default function BugReportModal({ open, screenshot, onClose }: BugReportModalProps) {
+export default function BugReportModal({ open, screenshot, initialDescription, onClose }: BugReportModalProps) {
   const { user } = useAuth()
   const location = useLocation()
   const { message } = App.useApp()
@@ -87,7 +89,7 @@ export default function BugReportModal({ open, screenshot, onClose }: BugReportM
           subTitle="Ekip inceleyip düzeltecek. Aynı sorunu tekrar yaşarsanız bu numarayı belirtebilirsiniz."
         />
       ) : (
-        <Form form={form} layout="vertical" onFinish={submit} requiredMark={false}>
+        <Form form={form} layout="vertical" onFinish={submit} requiredMark={false} initialValues={{ description: initialDescription }}>
           <Form.Item
             name="description"
             label="Ne yapıyordunuz, ne oldu?"

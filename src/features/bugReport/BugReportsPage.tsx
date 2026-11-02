@@ -5,7 +5,14 @@ import { App, Button, Card, Descriptions, Drawer, Empty, Flex, Image, Input, Seg
 import type { ColumnsType } from 'antd/es/table'
 import { MailOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
-import { BUG_REPORT_STATES, bugReportApi, type BugReportState, type BugReportSummary } from '../../api/bugReport'
+import {
+  BUG_REPORT_SOURCES,
+  BUG_REPORT_STATES,
+  bugReportApi,
+  type BugReportSource,
+  type BugReportState,
+  type BugReportSummary,
+} from '../../api/bugReport'
 import { getErrorMessage } from '../../api/errors'
 import PageHeader from '../../components/PageHeader'
 import TableToolbar from '../../components/TableToolbar'
@@ -29,22 +36,41 @@ const pathOf = (url: string) => {
 export default function BugReportsPage() {
   const [filter, setFilter] = useState<Filter>('yeni')
   const [search, setSearch] = useState('')
+  const [source, setSource] = useState<BugReportSource | undefined>()
   const [params, setParams] = useSearchParams()
   const selectedId = Number(params.get('id')) || null
   const { data, isLoading, error } = useBugReports(filter === 'tum' ? undefined : filter)
   const { data: all } = useBugReports()
 
-  const rows = useMemo(() => (data ?? []).filter((r) => matchesSearch(search, r.description, r.userName, r.pageUrl, String(r.id))), [data, search])
+  const rows = useMemo(
+    () => (data ?? []).filter((r) => (!source || r.source === source) && matchesSearch(search, r.description, r.userName, r.pageUrl, String(r.id))),
+    [data, search, source],
+  )
   const selected = (all ?? []).find((r) => r.id === selectedId) ?? null
   const select = (id: number | null) => setParams(id ? { id: String(id) } : {}, { replace: true })
 
   const columns: ColumnsType<BugReportSummary> = [
     { title: 'No', dataIndex: 'id', width: 64 },
     {
-      title: 'Tarih',
-      dataIndex: 'createdDate',
+      title: 'Son görülme',
+      key: 'tarih',
+      width: 150,
+      render: (_, r) => (
+        <Flex vertical>
+          <span>{dayjs(r.lastSeenDate ?? r.createdDate).format('DD.MM.YYYY HH:mm')}</span>
+          {r.occurrenceCount > 1 && (
+            <Typography.Text type="danger" style={{ fontSize: 12 }}>
+              {r.occurrenceCount} kez
+            </Typography.Text>
+          )}
+        </Flex>
+      ),
+    },
+    {
+      title: 'Kaynak',
+      dataIndex: 'source',
       width: 140,
-      render: (v: string) => dayjs(v).format('DD.MM.YYYY HH:mm'),
+      render: (s: BugReportSource) => <Tag color={BUG_REPORT_SOURCES[s]?.color}>{BUG_REPORT_SOURCES[s]?.label ?? s}</Tag>,
     },
     { title: 'Bildiren', dataIndex: 'userName', responsive: ['md'] },
     {
@@ -74,7 +100,7 @@ export default function BugReportsPage() {
     <>
       <PageHeader
         title="Hata bildirimleri"
-        description={`Kullanıcıların ${BUG_SHORTCUT_LABEL}, telefonu sallama veya "Hata bildir" düğmesiyle gönderdiği bildirimler.`}
+        description={`Kullanıcıların ${BUG_SHORTCUT_LABEL}, telefonu sallama veya "Hata bildir" düğmesiyle gönderdikleri ile kendiliğinden kaydedilen sayfa ve sunucu hataları. Aynı otomatik hata tekrar ederse sayacı artar.`}
         actions={<TestEmailButton />}
       />
       <Card data-tour="table">
@@ -88,6 +114,15 @@ export default function BugReportsPage() {
               { value: 'cozuldu', label: 'Çözüldü' },
               { value: 'tum', label: 'Tümü' },
             ]}
+          />
+          <Select<BugReportSource>
+            allowClear
+            placeholder="Tüm kaynaklar"
+            value={source}
+            onChange={setSource}
+            options={Object.entries(BUG_REPORT_SOURCES).map(([value, s]) => ({ value: value as BugReportSource, label: s.label }))}
+            style={{ width: 180 }}
+            aria-label="Kaynak"
           />
         </TableToolbar>
         <Table<BugReportSummary>
@@ -168,11 +203,12 @@ function BugReportDetail({ report, onClose }: { report: BugReportSummary; onClos
   const [note, setNote] = useState(report.adminNote ?? '')
   const { url: imageUrl, isLoading: imageLoading } = useScreenshotUrl(report)
 
-  const log = useMemo<ClientLogEntry[]>(() => {
+  // Elle bildirimlerde istemci günlüğü (JSON), otomatik kayıtlarda yığın izi (düz metin)
+  const log = useMemo<ClientLogEntry[] | null>(() => {
     try {
       return report.clientLog ? (JSON.parse(report.clientLog) as ClientLogEntry[]) : []
     } catch {
-      return []
+      return null
     }
   }, [report])
 
@@ -200,6 +236,14 @@ function BugReportDetail({ report, onClose }: { report: BugReportSummary; onClos
         ))}
 
       <Descriptions size="small" column={1} bordered>
+        <Descriptions.Item label="Kaynak">
+          <Tag color={BUG_REPORT_SOURCES[report.source]?.color}>{BUG_REPORT_SOURCES[report.source]?.label ?? report.source}</Tag>
+          {report.occurrenceCount > 1 && (
+            <Typography.Text type="danger">
+              {report.occurrenceCount} kez görüldü, son: {dayjs(report.lastSeenDate).format('DD MMMM HH:mm')}
+            </Typography.Text>
+          )}
+        </Descriptions.Item>
         <Descriptions.Item label="Tarih">{dayjs(report.createdDate).format('DD MMMM YYYY HH:mm')}</Descriptions.Item>
         <Descriptions.Item label="Bildiren">
           {report.userName} <Typography.Text type="secondary">({report.roles || 'rol yok'})</Typography.Text>
@@ -217,8 +261,12 @@ function BugReportDetail({ report, onClose }: { report: BugReportSummary; onClos
       </Descriptions>
 
       <div>
-        <Typography.Text strong>İstemci günlüğü ({log.length})</Typography.Text>
-        {log.length === 0 ? (
+        <Typography.Text strong>{log ? `İstemci günlüğü (${log.length})` : 'Yığın izi'}</Typography.Text>
+        {log === null ? (
+          <pre style={{ fontSize: 11, background: '#f6f8fa', padding: 8, borderRadius: 6, maxHeight: 320, overflow: 'auto', whiteSpace: 'pre-wrap' }}>
+            {report.clientLog}
+          </pre>
+        ) : log.length === 0 ? (
           <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="Kayıtlı hata yok" />
         ) : (
           <pre

@@ -135,6 +135,7 @@ export const tours: TourDef[] = [
           'Bilgisayarda her ekranda: Alt + Shift + H (Mac: Option + Shift + H).',
           'Telefonda: telefonu birkaç kez hızlıca sallayın. iPhone\'da önce hesap menüsünden "Sallayınca hata bildir"i açın.',
           'Görüntüde kişisel bilgi varsa göndermeden önce görüntü ekini kapatabilirsiniz; parola alanları görüntüye hiç girmez.',
+          'Bir hata mesajı çıkarsa yanındaki "Bu bir hata mı? Bildir" bağlantısı pencereyi mesajla doldurulmuş açar. Sayfa çökmeleri kendiliğinden kaydedilir.',
         ],
       },
       {
