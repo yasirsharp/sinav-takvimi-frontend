@@ -42,8 +42,8 @@ export function roleLabel(role: string): string {
 export const ROLE_DESCRIPTIONS: Record<string, string> = {
   [Roles.SuperAdmin]: 'Her şeyi yönetir; diğer süper yöneticileri de değiştirebilir.',
   [Roles.Admin]: 'Kullanıcı, bölüm, personel, öğrenci ve duyuru yönetimi; tüm sınavları planlar.',
-  [Roles.BolumGorevlisi]: 'Kendi bölümünün ders, derslik, ders ataması ve sınavlarını planlar. Bölümler ekranından görevli olarak atanır.',
-  [Roles.GorevliPersonel]: 'Tanımları ve müsaitlikleri görüntüler.',
+  [Roles.BolumGorevlisi]: 'Yalnızca kendi bölümünün derslerini, dersliklerini, ders atamalarını, sınavlarını ve öğrencilerini görür ve planlar; ortak kayıtları yönetici değiştirir. Bölümler ekranından görevli olarak atanır.',
+  [Roles.GorevliPersonel]: 'Tanımları ve müsaitlikleri görüntüler (öğrenci listesi hariç).',
   [Roles.AkademikPersonel]: 'Kendi sınav ve gözetmenlik görevlerini görür, müsaitliğini girer.',
   [Roles.Ogrenci]: 'Sadece kendi bölümünün sınav takvimini görür.',
 }

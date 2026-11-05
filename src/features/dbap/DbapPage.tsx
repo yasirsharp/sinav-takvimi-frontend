@@ -21,9 +21,12 @@ import ImportButton from '../import/ImportButton'
 import { useDbapImport } from '../import/definitions'
 import { useResetFormOnOpen } from '../../hooks/useResetFormOnOpen'
 import { useErrorToast } from '../../bugReport/useErrorToast'
+import { useBolumScope } from '../../hooks/useBolumScope'
+import ScopeLock from '../../components/ScopeLock'
 
 export default function DbapPage() {
   const canEdit = useCan(Planlayici)
+  const scope = useBolumScope()
   const importDefinition = useDbapImport()
   const { data, isLoading, error } = useDbapList()
   const { data: dersler } = useDersler()
@@ -95,7 +98,11 @@ export default function DbapPage() {
             key: 'actions',
             width: 110,
             align: 'right' as const,
-            render: (_: unknown, x: DbapDetail) => (
+            render: (_: unknown, x: DbapDetail) =>
+              // Görevli başka bölümün atamasını (ör. kendi verdiği dersin) değiştiremez
+              !scope.canManage([x.bolumId]) ? (
+                <ScopeLock />
+              ) : (
               <>
                 <Tooltip title="Düzenle">
                   <Button type="text" icon={<EditOutlined />} aria-label={`${x.dersKodu} ${x.bolumAd} düzenle`} onClick={() => setEditing(x)} />
@@ -106,7 +113,7 @@ export default function DbapPage() {
                   onDelete={() => deleteDbap.mutateAsync(x.id)}
                 />
               </>
-            ),
+              ),
           },
         ]
       : []),
@@ -216,6 +223,7 @@ function DbapFormModal({ dbap, existing, personelOptions, defaultBolumId, onClos
   const save = useSaveDbap()
   const { data: dersler, isLoading: derslerLoading } = useDersler()
   const bolumId = Form.useWatch('bolumId', form)
+  const scope = useBolumScope()
 
   const dersOptions = useMemo(
     () =>
@@ -262,7 +270,7 @@ function DbapFormModal({ dbap, existing, personelOptions, defaultBolumId, onClos
         }}
       >
         <Form.Item label="Bölüm" name="bolumId" rules={[{ required: true, message: 'Bölüm seçin.' }]}>
-          <BolumSelect />
+          <BolumSelect onlyIds={scope.ownBolumIds} />
         </Form.Item>
 
         <Form.Item

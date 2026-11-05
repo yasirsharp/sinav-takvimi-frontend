@@ -76,7 +76,10 @@ görüntüye hiç girmez. Sayfanın altında yazan sürüm (ör. `v0.11.0 (a1b2c
 
 Akademik personelin denediklerine ek olarak:
 
-- [ ] Tanımlar: bölümünüzün dersleri, derslikleri ve ders atamaları (varsayılan filtre kendi bölümünüz).
+- [ ] Tanımlar: yalnızca bölümünüzün dersleri, derslikleri, ders atamaları ve öğrencileri görünmeli (ortak ders ve
+      derslikler de görünür). Ortak veya başka bölümü de içeren satırlarda düzenle yerine **kilit** simgesi olmalı.
+- [ ] Başka bölümün sınavını göremediğinizi kontrol edin. Gözetmen olduğunuz başka bölüm sınavı görünür ama
+      taşınamaz.
 - [ ] **Sınav ekleme**: takvimde saat aralığı seçin veya "Yeni sınav". Ders, derslik(ler), gözetmen(ler) seçin.
       - Aynı saatte dolu derslik, başka sınavdaki gözetmen veya hocası başka sınavda olan ders için uyarı çıkmalı.
       - "Müsait değil" kaydı olan personel o saat için gözetmen seçilememeli.

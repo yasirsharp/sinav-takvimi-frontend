@@ -95,7 +95,10 @@ kontrol edebilirsiniz.
   - Boş bir saat aralığını seçip yeni sınav ekleyin.
   - Bir sınavı sürükleyip başka saate taşıyın.
   - Dolu bir dersliğe ya da hocanın başka sınavı olan saate taşımayı deneyin. Sistem çakışmayı yakalar ve sınavı eski yerine döndürür.
-  - Mehmet Demir'i çarşamba 14:00'teki bir sınava gözetmen yapmayı deneyin; "müsait değil" uyarısı çıkar.
+  - Çarşamba 13:30'a yeni bir sınav koyup gözetmen olarak Mehmet Demir'i seçin; "müsait değil" uyarısı çıkar.
+  - **Bölüm izolasyonu:** takvimde yalnızca Bilgisayar Mühendisliği sınavları (ve Elif Kaya'nın gözetmen olduğu
+    sınavlar) görünür. Dersler ve Derslikler'de ortak kayıtların (ör. MAT101, AMFI-1) yanında kilit vardır; bunları
+    yalnızca yönetici değiştirir. Öğrenciler ekranında yalnızca kendi bölümünün öğrencileri listelenir.
 - PDF rapor → Gözetmen görevlendirme.
 
 **4. Yönetici (5 dk).** `demo.yonetici` ile girin.

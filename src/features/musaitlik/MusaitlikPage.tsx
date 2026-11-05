@@ -34,7 +34,7 @@ import { TekrarTipi, type Musaitlik, type MusaitlikValues, type TekrarTipiValue 
 import { getErrorMessage } from '../../api/errors'
 import PageHeader from '../../components/PageHeader'
 import { useCan } from '../../hooks/usePermission'
-import { Planlayici } from '../../auth/roles'
+import { Planlayici, Yonetici } from '../../auth/roles'
 import { compareTr, matchesSearch } from '../../utils/search'
 import { useAkademikPersoneller, useOwnPersonel } from '../akademikPersonel/queries'
 import { describeHours, describeRecurrence, expandMusaitlik } from './musaitlikUtils'
@@ -71,6 +71,7 @@ interface FormDefaults {
 
 export default function MusaitlikPage() {
   const isPlanlayici = useCan(Planlayici)
+  const isYonetici = useCan(Yonetici)
   const { data: personeller } = useAkademikPersoneller()
   const own = useOwnPersonel()
   const [selectedPersonelId, setSelectedPersonelId] = useState<number | null>(null)
@@ -87,7 +88,8 @@ export default function MusaitlikPage() {
   const { message } = App.useApp()
   const showError = useErrorToast()
 
-  const canEdit = isPlanlayici || (own.personel != null && personelId === own.personel.id)
+  // Görevli herkesin müsaitliğini görür; değiştirmeyi kişinin kendisi ve yönetici yapar
+  const canEdit = isYonetici || (own.personel != null && personelId === own.personel.id)
   const personel = personeller?.find((p) => p.id === personelId) ?? own.personel
 
   const events = useMemo<EventInput[]>(() => {

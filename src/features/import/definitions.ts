@@ -11,6 +11,7 @@ import { getErrorMessage } from '../../api/errors'
 import { normalizeTr } from '../../utils/search'
 import { DERS_KODU_PATTERN, normalizeDersKodu } from '../../utils/dersKodu'
 import { useBolumler } from '../bolum/queries'
+import { useBolumScope } from '../../hooks/useBolumScope'
 import { useDersler } from '../ders/queries'
 import { useDerslikler } from '../derslik/queries'
 import { useDbapList } from '../dbap/queries'
@@ -98,6 +99,9 @@ function useInvalidate(...keys: string[][]) {
   )
 }
 
+const OWN_BOLUM_ONLY = 'Yalnızca kendi bölümünüz için ekleyebilirsiniz.'
+const SHARED_ADMIN_ONLY = 'Ortak kayıtları yalnızca yönetici ekleyebilir.'
+
 const bolumNote = 'Bölüm adları sistemdeki adlarla aynı yazılmalıdır (büyük/küçük harf önemli değildir).'
 
 export function useBolumImport(): ImportDefinition<{ ad: string }> {
@@ -139,6 +143,7 @@ export function useDerslikImport(): ImportDefinition<DerslikRow> {
   const { data: bolumler, isSuccess: b } = useBolumler()
   const { data: derslikler, isSuccess: d } = useDerslikler()
   const invalidate = useInvalidate(['derslikler'])
+  const scope = useBolumScope()
   return useMemo(() => {
     const resolve = bolumResolver(bolumler)
     const existing = new Set((derslikler ?? []).map((x) => normalizeTr(x.derslikAd)))
@@ -165,6 +170,9 @@ export function useDerslikImport(): ImportDefinition<DerslikRow> {
         const { ids, unknown } = resolve(splitList(v.bolumler))
         if (unknown.length) errors.push(`Bölüm bulunamadı: ${unknown.join(', ')}.`)
         if (!ortak && ids.length === 0 && !unknown.length) errors.push('Ortak olmayan derslik için en az bir bölüm yazın.')
+        // Bölüm görevlisi: yalnızca kendi bölümlerine ait derslik (sunucu da aynı kuralı uygular)
+        if (scope.isScoped && ortak) errors.push(SHARED_ADMIN_ONLY)
+        else if (scope.isScoped && ids.length && !scope.canManage(ids)) errors.push(OWN_BOLUM_ONLY)
         return { value: { ad, kapasite, ortakDerslik: !!ortak, bolumIds: ortak ? [] : ids }, errors }
       },
       uniqueKey: (v) => normalizeTr(v.ad),
@@ -174,7 +182,7 @@ export function useDerslikImport(): ImportDefinition<DerslikRow> {
         return r
       },
     }
-  }, [bolumler, derslikler, b, d, invalidate])
+  }, [bolumler, derslikler, b, d, invalidate, scope])
 }
 
 interface DersRow {
@@ -188,6 +196,7 @@ export function useDersImport(): ImportDefinition<DersRow> {
   const { data: bolumler, isSuccess: b } = useBolumler()
   const { data: dersler, isSuccess: d } = useDersler()
   const invalidate = useInvalidate(['dersler'])
+  const scope = useBolumScope()
   return useMemo(() => {
     const resolve = bolumResolver(bolumler)
     const existing = new Set((dersler ?? []).map((x) => x.kod ?? ''))
@@ -215,6 +224,8 @@ export function useDersImport(): ImportDefinition<DersRow> {
         const { ids, unknown } = resolve(splitList(v.bolumler))
         if (unknown.length) errors.push(`Bölüm bulunamadı: ${unknown.join(', ')}.`)
         if (!ortak && ids.length === 0 && !unknown.length) errors.push('Ortak olmayan ders için en az bir bölüm yazın.')
+        if (scope.isScoped && ortak) errors.push(SHARED_ADMIN_ONLY)
+        else if (scope.isScoped && ids.length && !scope.canManage(ids)) errors.push(OWN_BOLUM_ONLY)
         return { value: { kod, ad, ortakDers: !!ortak, bolumIds: ortak ? [] : ids }, errors }
       },
       uniqueKey: (v) => v.kod,
@@ -224,7 +235,7 @@ export function useDersImport(): ImportDefinition<DersRow> {
         return r
       },
     }
-  }, [bolumler, dersler, b, d, invalidate])
+  }, [bolumler, dersler, b, d, invalidate, scope])
 }
 
 export function usePersonelImport(): ImportDefinition<AkademikPersonelFormValues> {
@@ -331,6 +342,7 @@ export function useDbapImport(): ImportDefinition<DbapFormValues> {
   const { data: personeller, isSuccess: p } = useAkademikPersoneller()
   const { data: dbapList, isSuccess: l } = useDbapList()
   const invalidate = useInvalidate(['dbap'])
+  const scope = useBolumScope()
   return useMemo(() => {
     const resolve = bolumResolver(bolumler)
     const personelByName = new Map<string, number[]>()
@@ -354,6 +366,7 @@ export function useDbapImport(): ImportDefinition<DbapFormValues> {
         const { ids } = resolve([v.bolum])
         const bolumId = ids[0]
         if (!bolumId) errors.push(`Bölüm bulunamadı: ${v.bolum || '(boş)'}.`)
+        else if (!scope.canAccess(bolumId)) errors.push(OWN_BOLUM_ONLY)
         const ders = (dersler ?? []).find((x) => x.kod === kod)
         if (!ders) errors.push(`Ders bulunamadı: ${kod || '(boş)'}.`)
         else if (bolumId && !derslerForBolum([ders], bolumId).length) errors.push('Bu ders bu bölümde verilmiyor (Dersler ekranından bölümü ekleyin).')
@@ -371,5 +384,5 @@ export function useDbapImport(): ImportDefinition<DbapFormValues> {
         return r
       },
     }
-  }, [bolumler, dersler, personeller, dbapList, b, d, p, l, invalidate])
+  }, [bolumler, dersler, personeller, dbapList, b, d, p, l, invalidate, scope])
 }

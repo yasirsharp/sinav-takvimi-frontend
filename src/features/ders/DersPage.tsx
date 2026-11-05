@@ -19,9 +19,12 @@ import ImportButton from '../import/ImportButton'
 import { useDersImport } from '../import/definitions'
 import { useResetFormOnOpen } from '../../hooks/useResetFormOnOpen'
 import { useErrorToast } from '../../bugReport/useErrorToast'
+import { useBolumScope } from '../../hooks/useBolumScope'
+import ScopeLock from '../../components/ScopeLock'
 
 export default function DersPage() {
   const canEdit = useCan(Planlayici)
+  const scope = useBolumScope()
   const importDefinition = useDersImport()
   const { data, isLoading, error } = useDersler()
   const deleteDers = useDeleteDers()
@@ -75,7 +78,11 @@ export default function DersPage() {
             key: 'actions',
             width: 110,
             align: 'right' as const,
-            render: (_: unknown, ders: DersWithBolumler) => (
+            render: (_: unknown, ders: DersWithBolumler) =>
+              // Görevli: ortak veya başka bölümü de içeren dersi yönetici değiştirir
+              !scope.canManage(ders.bolumler.map((b) => b.bolumId)) ? (
+                <ScopeLock />
+              ) : (
               <>
                 <Tooltip title="Düzenle">
                   <Button type="text" icon={<EditOutlined />} aria-label={`${ders.dersAd} düzenle`} onClick={() => setEditing(ders)} />
@@ -86,7 +93,7 @@ export default function DersPage() {
                   onDelete={() => deleteDers.mutateAsync(ders.dersId)}
                 />
               </>
-            ),
+              ),
           },
         ]
       : []),
@@ -143,6 +150,7 @@ function DersFormModal({ ders, onClose }: { ders: DersWithBolumler | null | unde
   const showError = useErrorToast()
   const save = useSaveDers()
   const ortakDers = Form.useWatch('ortakDers', form)
+  const scope = useBolumScope()
 
   const initialValues: DersFormValues = {
     ad: ders?.dersAd ?? '',
@@ -218,9 +226,13 @@ function DersFormModal({ ders, onClose }: { ders: DersWithBolumler | null | unde
           label="Ortak ders"
           name="ortakDers"
           valuePropName="checked"
-          extra="Ortak dersler belirli bir bölüme bağlı değildir (ör. Türk Dili, Yabancı Dil)."
+          extra={
+            scope.isScoped
+              ? 'Ortak dersleri yalnızca yönetici ekleyebilir.'
+              : 'Ortak dersler belirli bir bölüme bağlı değildir (ör. Türk Dili, Yabancı Dil).'
+          }
         >
-          <Switch />
+          <Switch disabled={scope.isScoped} />
         </Form.Item>
 
         {!ortakDers && (
@@ -229,7 +241,7 @@ function DersFormModal({ ders, onClose }: { ders: DersWithBolumler | null | unde
             name="bolumIds"
             rules={[{ required: true, type: 'array', min: 1, message: 'En az bir bölüm seçin.' }]}
           >
-            <BolumSelect mode="multiple" />
+            <BolumSelect mode="multiple" onlyIds={scope.ownBolumIds} />
           </Form.Item>
         )}
       </Form>

@@ -85,7 +85,8 @@ export const navigation: NavEntry[] = [
         roles: Personel,
         element: <DbapPage />,
       },
-      { path: '/tanimlar/ogrenciler', label: 'Öğrenciler', icon: <IdcardOutlined />, roles: Personel, element: <OgrenciPage /> },
+      // Kişisel veri: yönetici tümünü, bölüm görevlisi kendi bölümünü görür
+      { path: '/tanimlar/ogrenciler', label: 'Öğrenciler', icon: <IdcardOutlined />, roles: Planlayici, element: <OgrenciPage /> },
     ],
   },
   { path: '/musaitlik', label: 'Müsaitlik', icon: <ClockCircleOutlined />, roles: Personel, element: <MusaitlikPage /> },

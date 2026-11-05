@@ -28,6 +28,7 @@ import { bolumRengi, formatDateParam, formatTimeParam, hasGozetmen, toDateTime }
 import SinavFormModal, { type SinavFormDefaults } from './SinavFormModal'
 import SinavDetailDrawer from './SinavDetailDrawer'
 import './calendar.css'
+import { useBolumScope } from '../../hooks/useBolumScope'
 import { useErrorToast } from '../../bugReport/useErrorToast'
 
 /** personelOnly: gözetmen ve derslik raporları personel bilgisi içerir, öğrencilere kapalıdır */
@@ -43,6 +44,7 @@ export default function SinavTakvimiPage() {
   const showError = useErrorToast()
   const canEdit = useCan(Planlayici)
   const isPersonel = useCan(Personel)
+  const scope = useBolumScope()
   const screens = Grid.useBreakpoint()
   const calendarRef = useRef<FullCalendar>(null)
   // Grid.useBreakpoint ilk çizimde boş döner; FullCalendar başlangıç görünümünü sadece bir kez okuduğu için
@@ -104,10 +106,12 @@ export default function SinavTakvimiPage() {
           end: toDateTime(s.sinavTarihi, s.sinavBitisSaati),
           backgroundColor: bolumRengi(s.bolumId),
           borderColor: bolumRengi(s.bolumId),
+          // Görevli: gözetmen olduğu başka bölüm sınavını görür ama taşıyamaz
+          editable: scope.canAccess(s.bolumId),
           extendedProps: { sinav: s, yerler },
         }
       }),
-    [gorunenSinavlar, dbapKod, derslikAd],
+    [gorunenSinavlar, dbapKod, derslikAd, scope],
   )
 
   const derslikOptions = useMemo(
@@ -214,6 +218,7 @@ export default function SinavTakvimiPage() {
           {isPersonel && (
             <BolumSelect
               mode="multiple"
+              onlyIds={scope.ownBolumIds}
               placeholder="Tüm bölümler"
               value={bolumFilter}
               onChange={(value) => setBolumFilter((value as number[] | undefined) ?? [])}
@@ -303,7 +308,7 @@ export default function SinavTakvimiPage() {
 
       <SinavDetailDrawer
         sinav={selected}
-        canEdit={canEdit}
+        canEdit={canEdit && !!selected && scope.canAccess(selected.bolumId)}
         deleting={deleteSinav.isPending}
         onClose={() => setSelected(null)}
         onEdit={(s) => {

@@ -4,6 +4,7 @@ import { DeleteOutlined, PlusOutlined } from '@ant-design/icons'
 import dayjs, { type Dayjs } from 'dayjs'
 import type { SinavDetay } from '../../api/sinav'
 import BolumSelect from '../../components/BolumSelect'
+import { useBolumScope } from '../../hooks/useBolumScope'
 import { compareTr, matchesSearch } from '../../utils/search'
 import { useDbapList } from '../dbap/queries'
 import { useDerslikler } from '../derslik/queries'
@@ -51,6 +52,7 @@ export default function SinavFormModal({ sinav, defaults, onClose }: SinavFormMo
 }
 
 function SinavForm({ sinav, defaults, onClose }: { sinav: SinavDetay | null; defaults?: SinavFormDefaults; onClose: () => void }) {
+  const scope = useBolumScope()
   const [form] = Form.useForm<FormValues>()
   const { message } = App.useApp()
   const showError = useErrorToast()
@@ -202,7 +204,7 @@ function SinavForm({ sinav, defaults, onClose }: { sinav: SinavDetay | null; def
     >
       <Flex gap={16} wrap>
         <Form.Item label="Bölüm" name="bolumId" style={{ flex: '1 1 220px' }} rules={[{ required: true, message: 'Bölüm seçin.' }]}>
-          <BolumSelect />
+          <BolumSelect onlyIds={scope.ownBolumIds} />
         </Form.Item>
         <Form.Item
           label="Ders (öğretim elemanıyla)"

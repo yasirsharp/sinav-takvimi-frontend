@@ -409,7 +409,7 @@ export const tours: TourDef[] = [
     title: 'Öğrenciler',
     summary: 'Öğrenci ekleme, Excel ile toplu aktarma, kullanıcı hesabı ve sınıf filtresi.',
     keywords: ['öğrenci ekle', 'öğrenci no', 'sınıf', 'hesap', 'geçici parola'],
-    roles: Personel,
+    roles: Planlayici,
     steps: [
       {
         target: 'add',
@@ -445,7 +445,7 @@ export const tours: TourDef[] = [
       {
         target: 'musaitlik-personel',
         title: 'Personel seçimi',
-        description: 'Planlayıcılar buradan herhangi bir personelin müsaitliğini görüp düzenleyebilir.',
+        description: 'Bölüm görevlisi ve yönetici buradan herhangi bir personelin müsaitliğini görebilir. Değiştirmeyi kişinin kendisi ve yönetici yapar.',
         roles: Planlayici,
       },
       {
@@ -604,6 +604,13 @@ export const faq: FaqItem[] = [
     answer:
       'Aynı gün kesişen saatte derslik, gözetmen ya da dersin öğretim elemanı başka bir sınavda görünüyor veya gözetmen o saati müsait değil olarak işaretlemiş. Takvimde "Sadece benim" yerine derslik filtresini kullanarak çakışan sınavı bulabilir, saati veya dersliği değiştirebilirsiniz.',
     keywords: ['çakışma', 'kaydedilmiyor', 'hata'],
+    roles: Planlayici,
+  },
+  {
+    question: 'Bazı satırlarda düzenle yerine kilit simgesi var, neden?',
+    answer:
+      'Bölüm görevlisi yalnızca kendi bölümünün kayıtlarını değiştirebilir. Ortak dersler, ortak derslikler ve başka bir bölümü de içeren kayıtları (ör. iki bölümde okutulan ders) yalnızca yönetici değiştirir. Gözetmen olduğunuz başka bölüm sınavlarını takvimde görürsünüz ama taşıyamazsınız.',
+    keywords: ['kilit', 'yetki', 'düzenleyemiyorum', 'bölüm görevlisi', 'ortak'],
     roles: Planlayici,
   },
   {

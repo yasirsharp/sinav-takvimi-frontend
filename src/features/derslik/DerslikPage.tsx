@@ -18,9 +18,12 @@ import ImportButton from '../import/ImportButton'
 import { useDerslikImport } from '../import/definitions'
 import { useResetFormOnOpen } from '../../hooks/useResetFormOnOpen'
 import { useErrorToast } from '../../bugReport/useErrorToast'
+import { useBolumScope } from '../../hooks/useBolumScope'
+import ScopeLock from '../../components/ScopeLock'
 
 export default function DerslikPage() {
   const canEdit = useCan(Planlayici)
+  const scope = useBolumScope()
   const importDefinition = useDerslikImport()
   const { data, isLoading, error } = useDerslikler()
   const deleteDerslik = useDeleteDerslik()
@@ -90,7 +93,11 @@ export default function DerslikPage() {
             key: 'actions',
             width: 110,
             align: 'right' as const,
-            render: (_: unknown, derslik: DerslikWithBolumler) => (
+            render: (_: unknown, derslik: DerslikWithBolumler) =>
+              // Görevli: ortak veya başka bölümü de içeren dersliği yönetici değiştirir
+              !scope.canManage(derslik.bolumler.map((b) => b.bolumId)) ? (
+                <ScopeLock />
+              ) : (
               <>
                 <Tooltip title="Düzenle">
                   <Button
@@ -106,7 +113,7 @@ export default function DerslikPage() {
                   onDelete={() => deleteDerslik.mutateAsync(derslik.derslikId)}
                 />
               </>
-            ),
+              ),
           },
         ]
       : []),
@@ -169,6 +176,7 @@ function DerslikFormModal({
   const showError = useErrorToast()
   const save = useSaveDerslik()
   const ortakDerslik = Form.useWatch('ortakDerslik', form)
+  const scope = useBolumScope()
 
   const initialValues: DerslikFormValues = {
     ad: derslik?.derslikAd ?? '',
@@ -226,9 +234,13 @@ function DerslikFormModal({
           label="Ortak derslik"
           name="ortakDerslik"
           valuePropName="checked"
-          extra="Ortak derslikler tüm bölümlerin sınavlarında kullanılabilir."
+          extra={
+            scope.isScoped
+              ? 'Ortak derslikleri yalnızca yönetici ekleyebilir.'
+              : 'Ortak derslikler tüm bölümlerin sınavlarında kullanılabilir.'
+          }
         >
-          <Switch />
+          <Switch disabled={scope.isScoped} />
         </Form.Item>
 
         {!ortakDerslik && (
@@ -237,7 +249,7 @@ function DerslikFormModal({
             name="bolumIds"
             rules={[{ required: true, type: 'array', min: 1, message: 'En az bir bölüm seçin.' }]}
           >
-            <BolumSelect mode="multiple" />
+            <BolumSelect mode="multiple" onlyIds={scope.ownBolumIds} />
           </Form.Item>
         )}
 
