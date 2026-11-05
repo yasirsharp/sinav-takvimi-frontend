@@ -9,8 +9,11 @@ import { tokenStorage } from '../auth/tokenStorage'
 import { CLAIMS, futureExp, makeToken } from './tokens'
 
 /** Verilen rollerle giriş yapmış bir kullanıcıyla bileşeni tüm sağlayıcılar içinde render eder */
-export function renderWithProviders(ui: ReactElement, { roles = ['super.admin'], bolumIds = [] as number[] } = {}) {
-  const extraClaims = Object.fromEntries(bolumIds.map((id, i) => [`${i + 1}.BolumId`, String(id)]))
+export function renderWithProviders(
+  ui: ReactElement,
+  { roles = ['super.admin'], bolumIds = [] as number[], extraClaims: more = {} as Record<string, string> } = {},
+) {
+  const extraClaims = { ...Object.fromEntries(bolumIds.map((id, i) => [`${i + 1}.BolumId`, String(id)])), ...more }
   tokenStorage.set(
     makeToken({ [CLAIMS.id]: '1', [CLAIMS.name]: 'Test Kullanıcı', [CLAIMS.role]: roles, exp: futureExp(), ...extraClaims }),
   )

@@ -41,6 +41,10 @@ export const userApi = {
   remove: (id: number) => unwrap(apiClient.delete<ApiResult<null>>(`/api/User/${id}`)),
   resetPassword: (id: number) =>
     unwrapData(apiClient.post<ApiResult<CreatedAccount>>(`/api/User/${id}/reset-password`)),
+  /** Görevli personelin salt okunur bölümleri */
+  okumaBolumleri: (id: number) => unwrapData(apiClient.get<ApiResult<number[]>>(`/api/User/${id}/okuma-bolumleri`)),
+  setOkumaBolumleri: (id: number, bolumIds: number[]) =>
+    unwrap(apiClient.put<ApiResult<null>>(`/api/User/${id}/okuma-bolumleri`, bolumIds)),
 }
 
 export const roleApi = {

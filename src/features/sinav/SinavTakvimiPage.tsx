@@ -1,4 +1,5 @@
-import { useMemo, useRef, useState } from 'react'
+import { useCallback, useMemo, useRef, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import FullCalendar from '@fullcalendar/react'
 import dayGridPlugin from '@fullcalendar/daygrid'
 import timeGridPlugin from '@fullcalendar/timegrid'
@@ -18,7 +19,7 @@ import BolumSelect from '../../components/BolumSelect'
 import { useAuth } from '../../auth/useAuth'
 import { useCan } from '../../hooks/usePermission'
 import { useDefaultBolumFilter } from '../../hooks/useDefaultBolumFilter'
-import { Personel, Planlayici } from '../../auth/roles'
+import { Personel, Planlayici, Roles } from '../../auth/roles'
 import { compareTr, matchesSearch } from '../../utils/search'
 import { useDbapList } from '../dbap/queries'
 import { useDerslikler } from '../derslik/queries'
@@ -27,6 +28,7 @@ import { useOwnPersonel } from '../akademikPersonel/queries'
 import { bolumRengi, formatDateParam, formatTimeParam, hasGozetmen, toDateTime } from './sinavUtils'
 import SinavFormModal, { type SinavFormDefaults } from './SinavFormModal'
 import SinavDetailDrawer from './SinavDetailDrawer'
+import TalepRequestModal from '../talep/TalepRequestModal'
 import './calendar.css'
 import { useBolumScope } from '../../hooks/useBolumScope'
 import { useErrorToast } from '../../bugReport/useErrorToast'
@@ -61,6 +63,15 @@ export default function SinavTakvimiPage() {
   const [editing, setEditing] = useState<SinavDetay | null | undefined>(undefined)
   const [defaults, setDefaults] = useState<SinavFormDefaults | undefined>()
   const [raporYukleniyor, setRaporYukleniyor] = useState(false)
+  const [talepSinav, setTalepSinav] = useState<SinavDetay | null>(null)
+  // Talepler ekranından gelen bağlantı: /sinav-takvimi?sinav=12&tarih=2026-11-09
+  const [searchParams, setSearchParams] = useSearchParams()
+  const [initialDate] = useState(() => {
+    const tarih = searchParams.get('tarih')
+    return tarih && dayjs(tarih).isValid() ? tarih : undefined
+  })
+  // Akademik personel (görevli değilse): sunucu yalnızca kendi sınav görevlerini döndürür
+  const yalnizKendi = !canEdit && !!user && user.roles.includes(Roles.AkademikPersonel) && !user.roles.includes(Roles.GorevliPersonel)
 
   const { data: sinavlar, isFetching, error } = useSinavlar(range?.start ?? null, range?.end ?? null)
   const { data: dbapList } = useDbapList()
@@ -78,20 +89,35 @@ export default function SinavTakvimiPage() {
   const dbapKod = useMemo(() => new Map((dbapList ?? []).map((x) => [x.id, x.dersKodu])), [dbapList])
   const derslikAd = useMemo(() => new Map((derslikler ?? []).map((d) => [d.derslikId, d.derslikAd])), [derslikler])
 
+  const benimSinavim = useCallback(
+    (s: SinavDetay) =>
+      !!benimKaydim &&
+      (dbapPersonel.get(s.dersBolumAkademikPersonelId) === benimKaydim.id || s.derslikler.some((d) => d.gozetmenId === benimKaydim.id)),
+    [benimKaydim, dbapPersonel],
+  )
+
+  // Bağlantıdaki sınav yüklenince ayrıntısı açılır; kapatılınca bir daha açılmaz
+  const hedefSinav = Number(searchParams.get('sinav')) || null
+  const [deepLinkDone, setDeepLinkDone] = useState(false)
+  const deepLinkSinav = !deepLinkDone && hedefSinav ? (sinavlar?.find((x) => x.id === hedefSinav) ?? null) : null
+  const shownSinav = selected ?? deepLinkSinav
+  const closeDrawer = () => {
+    setSelected(null)
+    if (hedefSinav) {
+      setDeepLinkDone(true)
+      setSearchParams({}, { replace: true })
+    }
+  }
+
   const gorunenSinavlar = useMemo(
     () =>
       (sinavlar ?? []).filter((s) => {
         if (etkinBolumFilter.length && !etkinBolumFilter.includes(s.bolumId)) return false
         if (derslikFilter && !s.derslikler.some((d) => d.derslikId === derslikFilter)) return false
-        if (sadeceBenim && benimKaydim) {
-          const benim =
-            dbapPersonel.get(s.dersBolumAkademikPersonelId) === benimKaydim.id ||
-            s.derslikler.some((d) => d.gozetmenId === benimKaydim.id)
-          if (!benim) return false
-        }
+        if (sadeceBenim && benimKaydim && !benimSinavim(s)) return false
         return true
       }),
-    [sinavlar, etkinBolumFilter, derslikFilter, sadeceBenim, benimKaydim, dbapPersonel],
+    [sinavlar, etkinBolumFilter, derslikFilter, sadeceBenim, benimKaydim, benimSinavim],
   )
 
   const events: EventInput[] = useMemo(
@@ -180,12 +206,13 @@ export default function SinavTakvimiPage() {
   return (
     <>
       <PageHeader
-        title="Sınav Takvimi"
+        title={yalnizKendi ? 'Sınavlarım' : user?.roles.includes(Roles.Ogrenci) && !isPersonel ? 'Sınavlarım' : 'Sınav Takvimi'}
         description={
           range && (
             <>
               {dayjs(range.start).format('DD MMMM')} – {dayjs(range.end).format('DD MMMM YYYY')} arasında{' '}
               <strong>{gorunenSinavlar.length}</strong> sınav
+              {yalnizKendi && ' · Dersini verdiğiniz ve gözetmen olduğunuz sınavlar. Değişiklik için sınava tıklayın.'}
               {canEdit && screens.md && ' · Yeni sınav için takvimde saat aralığı seçebilir, sınavları sürükleyerek taşıyabilirsiniz.'}
             </>
           )
@@ -215,7 +242,7 @@ export default function SinavTakvimiPage() {
 
       <Card>
         <Flex gap={12} wrap style={{ marginBottom: 16 }} align="center" data-tour="sinav-filters">
-          {isPersonel && (
+          {isPersonel && !yalnizKendi && (
             <BolumSelect
               mode="multiple"
               onlyIds={scope.ownBolumIds}
@@ -237,7 +264,7 @@ export default function SinavTakvimiPage() {
             style={{ minWidth: 200, maxWidth: '100%' }}
             aria-label="Dersliğe göre filtrele"
           />
-          {isPersonel && benimKaydim && (
+          {isPersonel && benimKaydim && !yalnizKendi && (
             <Flex gap={8} align="center" data-tour="sinav-mine">
               <Switch checked={sadeceBenim} onChange={setSadeceBenim} aria-label="Sadece benim sınavlarım" />
               <Typography.Text>Sadece benim sınavlarım</Typography.Text>
@@ -253,6 +280,7 @@ export default function SinavTakvimiPage() {
             plugins={[dayGridPlugin, timeGridPlugin, listPlugin, interactionPlugin]}
             locale={trLocale}
             initialView={initialView}
+            initialDate={initialDate}
             headerToolbar={{
               left: 'prev,next today',
               center: 'title',
@@ -307,19 +335,24 @@ export default function SinavTakvimiPage() {
       </Card>
 
       <SinavDetailDrawer
-        sinav={selected}
-        canEdit={canEdit && !!selected && scope.canAccess(selected.bolumId)}
+        sinav={shownSinav}
+        canEdit={canEdit && !!shownSinav && scope.canAccess(shownSinav.bolumId)}
         deleting={deleteSinav.isPending}
-        onClose={() => setSelected(null)}
+        onClose={closeDrawer}
+        canRequestChange={!!shownSinav && benimSinavim(shownSinav)}
+        onRequestChange={(s) => {
+          closeDrawer()
+          setTalepSinav(s)
+        }}
         onEdit={(s) => {
-          setSelected(null)
+          closeDrawer()
           setEditing(s)
         }}
         onDelete={async (s) => {
           try {
             await deleteSinav.mutateAsync(s.id)
             message.success('Sınav silindi.')
-            setSelected(null)
+            closeDrawer()
           } catch (err) {
             showError(err)
           }
@@ -327,6 +360,7 @@ export default function SinavTakvimiPage() {
       />
 
       <SinavFormModal sinav={editing} defaults={defaults} onClose={() => setEditing(undefined)} />
+      <TalepRequestModal sinav={talepSinav} onClose={() => setTalepSinav(null)} />
     </>
   )
 }

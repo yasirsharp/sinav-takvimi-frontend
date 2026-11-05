@@ -23,6 +23,11 @@ Demo verisindeki kişiler, öğrenciler ve e-posta adresleri **uydurmadır** (`@
    - Silmezseniz de veri ikinci kez kurulmaz; "zaten kurulu" diye atlanır.
    - `Seed__DemoPassword` satırı sunumdan sonra da kalabilir; bu satır yalnızca kurulumda kullanılır.
 
+> **Demo verisini bu sürümden önce kurduysanız** veri yeniden kurulmaz. İki şeyi elle yapın:
+> - `fakulte.sekreteri`'nin bölümlerini seçin: Yönetim → Kullanıcılar → Roller → altta Bilgisayar ve
+>   Elektrik-Elektronik.
+> - Bekleyen bir talep için sunumdan önce `mehmet.demir` ile bir sınavda **Değişiklik iste** deyin.
+
 Mevcut kayıtlarınız korunur. Aynı adlı bölüm, derslik ve dersler (ör. "Bilgisayar Mühendisliği", "BLM201")
 yeniden kullanılır, yenileri eklenir.
 
@@ -58,10 +63,10 @@ Parola: hepsi için `web.config`'teki **`Seed__DemoPassword`**.
 | `demo.yonetici` | Yönetici | Her şey: tanımlar, kullanıcılar, duyurular, hata bildirimleri |
 | `elif.kaya` | Doç. Dr., Bilgisayar Müh. **bölüm görevlisi** | Kendi bölümünün sınavlarını planlama, bölüme duyuru |
 | `ayse.sahin` / `fatma.ozdemir` / `merve.dogan` | Diğer bölümlerin görevlileri | Aynı rol, farklı bölüm |
-| `mehmet.demir` | Dr. Öğr. Üyesi (BLM) | Hoca görünümü: sınav görevleri, bildirimler; her çarşamba 13–17 "müsait değil" |
+| `mehmet.demir` | Dr. Öğr. Üyesi (BLM) | Hoca görünümü: yalnızca kendi sınavları, bildirimler, bekleyen bir değişiklik talebi; her çarşamba 13–17 "müsait değil" |
 | `okan.yavuz` | Matematik I'i 4 bölümde veren hoca | "Sadece benim sınavlarım" filtresi |
 | `selin.aydin` | Arş. Gör. (BLM) | Konferans günü müsait değil; gözetmenlik görevleri |
-| `fakulte.sekreteri` | Görevli personel | Tanımları ve müsaitlikleri görür, değiştiremez |
+| `fakulte.sekreteri` | Görevli personel (Bilgisayar ve Elektrik-Elektronik) | Yalnızca bu iki bölümün her şeyini görür, değiştiremez |
 | `2025010101` | Bilgisayar Müh. 1. sınıf öğrencisi | Yalnızca kendi bölümünün sınavları; girişte duyuru |
 | `2023020301` | Elektrik-Elektronik 3. sınıf öğrencisi | Farklı bölümün öğrencisi farklı takvim görür |
 | `2022010410` | **Pasif** öğrenci | Giriş yapamaz |
@@ -84,10 +89,12 @@ kontrol edebilirsiniz.
 - Telefonda aynı ekranı açarsanız liste görünümüyle başlar.
 
 **2. Hoca gözüyle (3 dk).** `mehmet.demir` ile girin.
+- Menü sade: Ana Sayfa · Sınavlarım · Müsaitliğim · Taleplerim.
 - Ana sayfada "Sınav görevlerim": dersinin sınavı ve gözetmenlik görevleri.
+- Sınavlarım: yalnızca dersini verdiği ve gözetmen olduğu sınavlar. Bir sınava tıklayıp **Değişiklik iste** deyin.
+- Taleplerim: demo verisindeki bekleyen talep ve az önce açtığınız talep.
 - Zil: görev bildirimleri.
-- Müsaitlik: her çarşamba 13–17 kaydı. Takvimde bir gün seçip yeni bir "müsait değilim" kaydı ekleyin.
-- Sınav Takvimi → "Sadece benim sınavlarım".
+- Müsaitliğim: her çarşamba 13–17 kaydı. Takvimde bir gün seçip yeni bir "müsait değilim" kaydı ekleyin.
 
 **3. Bölüm görevlisi (5 dk).** `elif.kaya` ile girin.
 - Ana sayfa: uyarılar (atanmamış BLM403, gözetmeni eksik derslik).
@@ -99,12 +106,24 @@ kontrol edebilirsiniz.
   - **Bölüm izolasyonu:** takvimde yalnızca Bilgisayar Mühendisliği sınavları (ve Elif Kaya'nın gözetmen olduğu
     sınavlar) görünür. Dersler ve Derslikler'de ortak kayıtların (ör. MAT101, AMFI-1) yanında kilit vardır; bunları
     yalnızca yönetici değiştirir. Öğrenciler ekranında yalnızca kendi bölümünün öğrencileri listelenir.
+- **Talepler** (menüde sayı): Mehmet Demir'in talebini açın, **Sınavı aç** ile sınavı taşıyın, **Kabul et** deyin.
+  Mehmet Demir'e bildirim gider.
 - PDF rapor → Gözetmen görevlendirme.
 
 **4. Yönetici (5 dk).** `demo.yonetici` ile girin.
 - Tanımlar → **Excel'den aktar** ile canlı veri girişi (bkz. bölüm 5).
 - Kullanıcılar: rol verme, parola sıfırlama (geçici parola bir kez gösterilir), pasifleştirme.
 - Duyurular: hedef kitle + bölüm, açılır pencere.
+- Görevli personelin bölümleri: Kullanıcılar → `fakulte.sekreteri` → Roller. Altta seçili bölümler görünür.
+
+**Süper yönetici: kullanıcı olarak gir (2 dk).** Süper yönetici hesabıyla girin (demo verisinde yoktur; sitenin
+ilk yöneticisi süper yöneticidir).
+- Kullanıcılar'da `elif.kaya` satırında **⋯ → Bu kullanıcı olarak gir**. Sistem Elif Kaya girmiş gibi açılır:
+  bölüm görevlisi menüsü, yalnızca Bilgisayar Mühendisliği. Üstte turuncu şerit görünür.
+- Elif Kaya olarak bir işlem yapın (ör. talebi yanıtlayın).
+- Hesap menüsü → **Kullanıcı değiştir → Kendi hesabıma dön**. Aynı menüde Elif Kaya artık "son kullanılanlar"
+  arasındadır; tek tıkla tekrar geçebilirsiniz.
+- Yapılan değişiklikler sunucu logunda "Kişi olarak işlem: (süper yönetici) → Elif Kaya" diye görünür.
 
 **5. Destek araçları (3 dk).**
 - **Tanıtım turu:** hesap menüsü → "Tanıtım turunu başlat". Her sayfa başlığında **?** düğmesi var.

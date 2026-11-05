@@ -16,6 +16,8 @@ export type RoleName = (typeof Roles)[keyof typeof Roles]
 export const Yonetici: readonly string[] = [Roles.SuperAdmin, Roles.Admin]
 /** Ders, derslik, DBAP ve sınav planlaması */
 export const Planlayici: readonly string[] = [...Yonetici, Roles.BolumGorevlisi]
+/** Bölüm verisini okuyan roller: planlayıcılar ve görevli personel (sunucu kapsamı bölümle sınırlar) */
+export const BolumOkuyucu: readonly string[] = [...Planlayici, Roles.GorevliPersonel]
 /** Öğrenci olmayan tüm personel */
 export const Personel: readonly string[] = [...Planlayici, Roles.GorevliPersonel, Roles.AkademikPersonel]
 
@@ -43,8 +45,8 @@ export const ROLE_DESCRIPTIONS: Record<string, string> = {
   [Roles.SuperAdmin]: 'Her şeyi yönetir; diğer süper yöneticileri de değiştirebilir.',
   [Roles.Admin]: 'Kullanıcı, bölüm, personel, öğrenci ve duyuru yönetimi; tüm sınavları planlar.',
   [Roles.BolumGorevlisi]: 'Yalnızca kendi bölümünün derslerini, dersliklerini, ders atamalarını, sınavlarını ve öğrencilerini görür ve planlar; ortak kayıtları yönetici değiştirir. Bölümler ekranından görevli olarak atanır.',
-  [Roles.GorevliPersonel]: 'Tanımları ve müsaitlikleri görüntüler (öğrenci listesi hariç).',
-  [Roles.AkademikPersonel]: 'Kendi sınav ve gözetmenlik görevlerini görür, müsaitliğini girer.',
+  [Roles.GorevliPersonel]: 'Atandığı bölüm(ler)in sınavlarını, derslerini, dersliklerini, personel görevlerini ve öğrencilerini görür; hiçbir şeyi değiştiremez. Bölümleri bu pencerede seçilir.',
+  [Roles.AkademikPersonel]: 'Yalnızca dersini verdiği ve gözetmen olduğu sınavları görür, değişiklik ister, kendi müsaitliğini girer.',
   [Roles.Ogrenci]: 'Sadece kendi bölümünün sınav takvimini görür.',
 }
 

@@ -8,6 +8,7 @@ import {
   CalendarOutlined,
   ClockCircleOutlined,
   IdcardOutlined,
+  InboxOutlined,
   TeamOutlined,
   WarningOutlined,
 } from '@ant-design/icons'
@@ -30,6 +31,8 @@ import { useMyDuyurular } from '../features/duyuru/queries'
 import { unassignedDersler } from '../features/dbap/dbapRules'
 import { useDefaultBolumFilter } from '../hooks/useDefaultBolumFilter'
 import TourButton from '../tour/TourButton'
+import { useBolumScope } from '../hooks/useBolumScope'
+import { usePendingTalepCount } from '../features/talep/queries'
 
 const cardStyle = { borderTop: `4px solid ${brand.turquoise}`, height: '100%' }
 
@@ -40,6 +43,8 @@ export default function DashboardPage() {
   if (!user) return null
 
   const isOgrenci = user.roles.includes(Roles.Ogrenci) && !isPersonel
+  // Görevli personel: atandığı bölümlerin salt okunur özeti
+  const isGp = !isPlanlayici && user.roles.includes(Roles.GorevliPersonel)
 
   return (
     <Row gutter={[16, 16]}>
@@ -72,9 +77,9 @@ export default function DashboardPage() {
         )}
       </Col>
 
-      {isPlanlayici && (
+      {(isPlanlayici || isGp) && (
         <Col span={24}>
-          <PlannerOverview />
+          <PlannerOverview readOnly={isGp} />
         </Col>
       )}
 
@@ -185,8 +190,10 @@ function MyDuties() {
   const personelId = own.personel?.id
   // Personel kaydı olmayan planlayıcı (ör. sistem yöneticisi) kendi görevleri yerine yaklaşan tüm sınavları görür
   const isPlanlayici = useCan(Planlayici)
+  const { user } = useAuth()
+  const isGp = !!user?.roles.includes(Roles.GorevliPersonel)
   const [bolumFilter] = useDefaultBolumFilter()
-  const showAll = own.noRecord && isPlanlayici
+  const showAll = own.noRecord && (isPlanlayici || isGp)
   const dbapPersonel = useMemo(() => new Map((dbap ?? []).map((x) => [x.id, x.akademikPersonelId])), [dbap])
   const mine = useMemo(
     () =>
@@ -272,8 +279,12 @@ function MyDuties() {
   )
 }
 
-function PlannerOverview() {
-  const { data: bolumler } = useBolumler()
+function PlannerOverview({ readOnly = false }: { readOnly?: boolean }) {
+  const scope = useBolumScope()
+  const { data: pendingTalepler } = usePendingTalepCount(!readOnly)
+  const { data: tumBolumler } = useBolumler()
+  // Kapsamlı kullanıcıda (görevli, görevli personel) yalnızca kendi bölümleri sayılır
+  const bolumler = useMemo(() => tumBolumler?.filter((b) => scope.canAccess(b.id)), [tumBolumler, scope])
   const { data: dersler } = useDersler()
   const { data: derslikler } = useDerslikler()
   const { data: personeller } = useAkademikPersoneller()
@@ -304,7 +315,18 @@ function PlannerOverview() {
     { title: 'Ders atamaları', path: '/tanimlar/ders-atamalari', count: dbap?.length },
     { title: 'Öğrenciler', path: '/tanimlar/ogrenciler', count: ogrenciler?.length },
   ]
-  const firstMissing = steps.findIndex((s) => s.count === 0)
+  const firstMissing = readOnly ? -1 : steps.findIndex((s) => s.count === 0)
+
+  if (readOnly && scope.noBolum) {
+    return (
+      <Alert
+        type="warning"
+        showIcon
+        title="Size henüz bölüm atanmamış."
+        description="Görevli personel yalnızca atandığı bölümlerin verisini görür. Yöneticiniz Kullanıcılar → Roller penceresinden bölümünüzü seçmeli."
+      />
+    )
+  }
 
   const stats = [
     { title: 'Bu haftaki sınavlar', value: haftaSinavlari?.length, icon: <CalendarOutlined />, to: '/sinav-takvimi' },
@@ -347,8 +369,20 @@ function PlannerOverview() {
         ))}
       </Row>
 
-      {(!!atanmamis || gozetmensiz > 0) && (
+      {(!!atanmamis || gozetmensiz > 0 || !!pendingTalepler) && (
         <Flex vertical gap={8} data-tour="dashboard-alerts">
+          {!!pendingTalepler && (
+            <Alert
+              type="warning"
+              showIcon
+              icon={<InboxOutlined />}
+              title={
+                <>
+                  Yanıt bekleyen {pendingTalepler} sınav değişiklik talebi var. <Link to="/talepler">Taleplere git</Link>
+                </>
+              }
+            />
+          )}
           {!!atanmamis && (
             <Alert
               type="warning"

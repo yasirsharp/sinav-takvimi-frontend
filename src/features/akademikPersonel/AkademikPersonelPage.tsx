@@ -7,6 +7,7 @@ import { getErrorMessage } from '../../api/errors'
 import PageHeader from '../../components/PageHeader'
 import TableToolbar from '../../components/TableToolbar'
 import DeleteButton from '../../components/DeleteButton'
+import ImpersonateMenu from '../../components/ImpersonateMenu'
 import { defaultPagination } from '../../components/tableDefaults'
 import { useCan } from '../../hooks/usePermission'
 import { Yonetici } from '../../auth/roles'
@@ -72,7 +73,7 @@ export default function AkademikPersonelPage() {
           {
             title: 'İşlemler',
             key: 'actions',
-            width: 110,
+            width: 150,
             align: 'right' as const,
             render: (_: unknown, personel: AkademikPersonel) => (
               <>
@@ -89,6 +90,7 @@ export default function AkademikPersonelPage() {
                   successMessage="Akademik personel silindi."
                   onDelete={() => deletePersonel.mutateAsync(personel.id)}
                 />
+                <ImpersonateMenu userId={personel.userId || null} name={`${personel.unvan} ${personel.ad}`} active={personel.status !== false} />
               </>
             ),
           },

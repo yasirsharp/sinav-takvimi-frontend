@@ -1,5 +1,5 @@
 import { Button, Descriptions, Drawer, Flex, Popconfirm, Tag, Typography } from 'antd'
-import { DeleteOutlined, EditOutlined } from '@ant-design/icons'
+import { DeleteOutlined, EditOutlined, SendOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
 import type { SinavDetay } from '../../api/sinav'
 import { useDerslikler } from '../derslik/queries'
@@ -13,9 +13,12 @@ interface Props {
   onClose: () => void
   onEdit: (sinav: SinavDetay) => void
   onDelete: (sinav: SinavDetay) => Promise<void>
+  /** Hoca veya gözetmen: "Değişiklik iste" düğmesi */
+  canRequestChange?: boolean
+  onRequestChange?: (sinav: SinavDetay) => void
 }
 
-export default function SinavDetailDrawer({ sinav, canEdit, deleting, onClose, onEdit, onDelete }: Props) {
+export default function SinavDetailDrawer({ sinav, canEdit, deleting, onClose, onEdit, onDelete, canRequestChange, onRequestChange }: Props) {
   const { data: derslikler } = useDerslikler()
   const { data: personeller } = useAkademikPersoneller()
   const derslik = (id: number) => derslikler?.find((d) => d.derslikId === id)
@@ -32,7 +35,7 @@ export default function SinavDetailDrawer({ sinav, canEdit, deleting, onClose, o
       extra={sinav && <Tag color={bolumRengi(sinav.bolumId)}>{sinav.bolumAd}</Tag>}
       footer={
         sinav &&
-        canEdit && (
+        (canEdit ? (
           <Flex justify="end" gap={8}>
             <Popconfirm
               title="Sınavı silmek istediğinize emin misiniz?"
@@ -49,7 +52,16 @@ export default function SinavDetailDrawer({ sinav, canEdit, deleting, onClose, o
               Düzenle
             </Button>
           </Flex>
-        )
+        ) : canRequestChange && onRequestChange ? (
+          <Flex justify="space-between" align="center" gap={8} wrap>
+            <Typography.Text type="secondary" style={{ fontSize: 12 }}>
+              Tarih, saat veya derslik size uymuyor mu?
+            </Typography.Text>
+            <Button type="primary" icon={<SendOutlined />} onClick={() => onRequestChange(sinav)}>
+              Değişiklik iste
+            </Button>
+          </Flex>
+        ) : null)
       }
     >
       {sinav && (

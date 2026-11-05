@@ -11,11 +11,17 @@ import {
   MobileOutlined,
   MenuOutlined,
   QuestionCircleOutlined,
+  RollbackOutlined,
+  SwapOutlined,
   UserOutlined,
+  UserSwitchOutlined,
 } from '@ant-design/icons'
 import { useAuth } from '../auth/useAuth'
-import { Yonetici, hasAnyRole, roleLabel } from '../auth/roles'
-import { flattenNavigation, isGroup, navigation } from './navigation'
+import { Planlayici, Yonetici, hasAnyRole, roleLabel } from '../auth/roles'
+import { flattenNavigation, isGroup, menuFor } from './navigation'
+import { useSwitchUser } from '../auth/useSwitchUser'
+import { readRecentUsers } from '../auth/recentUsers'
+import { usePendingTalepCount } from '../features/talep/queries'
 import NotificationBell from './NotificationBell'
 import AnnouncementPopup from './AnnouncementPopup'
 import ErrorBoundary from '../components/ErrorBoundary'
@@ -31,6 +37,7 @@ import logoUrl from '../assets/duzce-logo.png'
 const { Content, Footer } = Layout
 
 const BUG_REPORTS_PATH = '/yonetim/hata-bildirimleri'
+const TALEPLER_PATH = '/talepler'
 
 /** duzce.edu.tr'deki gibi ortalanmış içerik genişliği */
 const container: CSSProperties = { maxWidth: 1440, margin: '0 auto', padding: '0 24px' }
@@ -48,21 +55,42 @@ export default function AppLayout() {
   // Geçici parolayla giren kullanıcı parolasını değiştirene kadar menü gösterilmez
   const showMenu = !user?.mustChangePassword
 
-  // Tarayıcı sekmesinde sayfa adı
+  const menu = useMemo(() => menuFor(roles), [roles])
+
+  // Tarayıcı sekmesinde sayfa adı (menüdeki role özgü ad önceliklidir: "Sınavlarım" gibi)
   useEffect(() => {
-    const item = flattenNavigation().find((i) => i.path === location.pathname)
+    const item = flattenNavigation(menu).find((i) => i.path === location.pathname) ?? flattenNavigation().find((i) => i.path === location.pathname)
     const label = location.pathname === '/parola-degistir' ? 'Parola değiştir' : item?.label
     document.title = label && location.pathname !== '/' ? `${label} · Sınav Takvimi` : 'Sınav Takvimi · Düzce Üniversitesi'
-  }, [location.pathname])
+  }, [location.pathname, menu])
 
   const bugReport = useBugReport()
   const isYonetici = hasAnyRole(roles, Yonetici)
   const { data: newBugReports } = useNewBugReportCount(isYonetici && showMenu)
+  const { data: pendingTalepler } = usePendingTalepCount(hasAnyRole(roles, Planlayici) && showMenu)
+  const { canSwitch, switchTo, backToSelf } = useSwitchUser()
+  const actAsBy = user?.actAsBy
+  // Liste süper yöneticinin kimliğiyle tutulur; kişi olarak girilmişken de aynı liste görünür
+  const recentUsers = useMemo(
+    () => (canSwitch && user ? readRecentUsers(actAsBy?.id ?? user.id).filter((u) => u.id !== user.id) : []),
+    [canSwitch, user, actAsBy],
+  )
+
+  const badgeFor = (path: string, label: string) => {
+    const count = path === BUG_REPORTS_PATH ? newBugReports : path === TALEPLER_PATH ? pendingTalepler : 0
+    return count ? (
+      <Badge count={count} size="small" offset={[10, 0]}>
+        {label}
+      </Badge>
+    ) : (
+      label
+    )
+  }
 
   // Sadece kullanıcının rolüne uygun menü öğeleri gösterilir
   const menuItems = useMemo<MenuProps['items']>(
     () =>
-      navigation
+      menu
         .filter((entry) => hasAnyRole(roles, entry.roles))
         .map((entry) =>
           isGroup(entry)
@@ -72,25 +100,15 @@ export default function AppLayout() {
                 label: entry.label,
                 children: entry.children
                   .filter((child) => hasAnyRole(roles, child.roles))
-                  .map((child) => ({
-                    key: child.path,
-                    icon: child.icon,
-                    label:
-                      child.path === BUG_REPORTS_PATH && newBugReports ? (
-                        <Badge count={newBugReports} size="small" offset={[10, 0]}>
-                          {child.label}
-                        </Badge>
-                      ) : (
-                        child.label
-                      ),
-                  })),
+                  .map((child) => ({ key: child.path, icon: child.icon, label: badgeFor(child.path, child.label) })),
               }
-            : { key: entry.path, icon: isMobile ? entry.icon : undefined, label: entry.label },
+            : { key: entry.path, icon: isMobile ? entry.icon : undefined, label: badgeFor(entry.path, entry.label) },
         ),
-    [roles, isMobile, newBugReports],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [menu, roles, isMobile, newBugReports, pendingTalepler],
   )
 
-  const openGroup = navigation.find(
+  const openGroup = menu.find(
     (entry) => isGroup(entry) && entry.children.some((child) => child.path === location.pathname),
   )
 
@@ -105,12 +123,60 @@ export default function AppLayout() {
       ),
     },
     { type: 'divider' },
-    {
-      key: 'password',
-      icon: <KeyOutlined />,
-      label: 'Parolamı değiştir',
-      onClick: () => navigate('/parola-degistir'),
-    },
+    ...(canSwitch && showMenu
+      ? [
+          {
+            key: 'switch',
+            icon: <UserSwitchOutlined />,
+            label: 'Kullanıcı değiştir',
+            children: [
+              ...(actAsBy
+                ? [
+                    {
+                      key: 'switch-self',
+                      icon: <RollbackOutlined />,
+                      label: `Kendi hesabıma dön (${actAsBy.name || 'süper yönetici'})`,
+                      onClick: () => void backToSelf(),
+                    },
+                  ]
+                : []),
+              ...recentUsers.map((u) => ({
+                key: `switch-${u.id}`,
+                icon: <SwapOutlined />,
+                label: (
+                  <span>
+                    {u.name}
+                    {u.roles.length > 0 && (
+                      <Typography.Text type="secondary" style={{ fontSize: 12, marginLeft: 6 }}>
+                        {u.roles.map(roleLabel).join(', ')}
+                      </Typography.Text>
+                    )}
+                  </span>
+                ),
+                onClick: () => void switchTo(u.id, u.name),
+              })),
+              {
+                key: 'switch-pick',
+                icon: <UserOutlined />,
+                label: actAsBy ? 'Başka bir kullanıcı seç… (kendi hesabınızda)' : 'Kullanıcı seç…',
+                disabled: !!actAsBy,
+                onClick: () => navigate('/yonetim/kullanicilar'),
+              },
+            ],
+          },
+        ]
+      : []),
+    // Kişi olarak girilmişken başkasının parolası değiştirilemez (sunucu da reddeder)
+    ...(!actAsBy
+      ? [
+          {
+            key: 'password',
+            icon: <KeyOutlined />,
+            label: 'Parolamı değiştir',
+            onClick: () => navigate('/parola-degistir'),
+          },
+        ]
+      : []),
     ...(showMenu && tour
       ? [
           {
@@ -163,6 +229,34 @@ export default function AppLayout() {
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
+      {actAsBy && (
+        <div
+          role="status"
+          data-testid="impersonation-banner"
+          style={{
+            position: 'sticky',
+            top: 0,
+            zIndex: 1000,
+            background: '#d46b08',
+            color: '#fff',
+            padding: '6px 16px',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            gap: 12,
+            flexWrap: 'wrap',
+            fontSize: 14,
+          }}
+        >
+          <span>
+            <UserSwitchOutlined /> <strong>{user?.name || user?.email}</strong> olarak kullanıyorsunuz
+            {roles.length > 0 && <span style={{ opacity: 0.85 }}> ({roles.map(roleLabel).join(', ')})</span>}
+          </span>
+          <Button size="small" icon={<RollbackOutlined />} onClick={() => void backToSelf()}>
+            Kendi hesabıma dön
+          </Button>
+        </div>
+      )}
       <header style={{ background: '#fff' }}>
         {/* Üst band: sitedeki turkuaz → mavi geçiş, alt köşeleri yuvarlak */}
         <div style={container}>

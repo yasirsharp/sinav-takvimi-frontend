@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { dayFromToday, loginAsAdmin } from './helpers'
+import { dayFromToday, loginAsAdmin, openedDialog } from './helpers'
 
 test('planlayıcı formdan sınav ekler, takvimde görür ve siler', async ({ page }) => {
   await loginAsAdmin(page)
@@ -8,7 +8,7 @@ test('planlayıcı formdan sınav ekler, takvimde görür ve siler', async ({ pa
   const [y, m, d] = tarih.split('-')
 
   await page.getByRole('button', { name: 'Yeni sınav' }).click()
-  const dialog = page.getByRole('dialog')
+  const dialog = await openedDialog(page)
   await dialog.getByLabel('Bölüm').click()
   await page.getByTitle('Bilgisayar Mühendisliği').last().click()
   await dialog.getByLabel('Ders (öğretim elemanıyla)').click()

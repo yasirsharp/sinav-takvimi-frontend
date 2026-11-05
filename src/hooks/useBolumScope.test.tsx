@@ -27,3 +27,10 @@ describe('useBolumScope', () => {
     for (const t of ['scoped:false', 'mixed:true', 'ortak:true', 'access2:true']) expect(screen.getByText(t)).toBeInTheDocument()
   })
 })
+
+describe('useBolumScope: görevli personel', () => {
+  it('atandığı bölümleri görür, hiçbirini yönetemez', () => {
+    renderWithProviders(<Probe />, { roles: ['gorevli.personel'], extraClaims: { '1.OkumaBolumId': '1', '2.OkumaBolumId': '2' } })
+    for (const t of ['scoped:true', 'own1:false', 'access2:true']) expect(screen.getByText(t)).toBeInTheDocument()
+  })
+})

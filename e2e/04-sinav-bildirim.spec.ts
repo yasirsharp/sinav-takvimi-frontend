@@ -77,10 +77,11 @@ test('öğrenci açılır duyuruyu bir kez görür ve yaklaşan sınavını tele
   await page.waitForTimeout(1000)
   await expect(page.getByRole('dialog')).toHaveCount(0)
 
-  // Mobil menü: öğrenci yönetim menülerini görmez
+  // Mobil menü: öğrenci yalnızca Ana Sayfa ve Sınavlarım'ı görür
   await page.getByRole('button', { name: 'Menüyü aç' }).click()
-  await expect(page.getByText('Sınav Takvimi', { exact: true }).last()).toBeVisible()
+  await expect(page.getByRole('menuitem', { name: 'Sınavlarım' })).toBeVisible()
   await expect(page.getByText('Tanımlar')).toHaveCount(0)
+  await expect(page.getByRole('menuitem', { name: 'Yardım' })).toHaveCount(0)
 })
 
 test('yönetici ana sayfası yaklaşan sınavları ve uyarıları gösterir', async ({ page }) => {

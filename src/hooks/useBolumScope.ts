@@ -3,22 +3,30 @@ import { useAuth } from '../auth/useAuth'
 import { Roles, Yonetici, hasAnyRole } from '../auth/roles'
 
 /**
- * Bölüm görevlisinin kapsamı (sunucudaki BolumScope ile aynı kurallar; asıl kontrol sunucudadır).
- * Yönetici sınırsızdır. Görevli yalnızca kendi bölümlerinin kayıtlarını değiştirir; ortak (bölümsüz) veya başka
- * bölümü de içeren kayıtları yalnızca yönetici değiştirir.
+ * Bölüm kapsamı (sunucudaki BolumScope ile aynı kurallar; asıl kontrol sunucudadır).
+ * - Yönetici sınırsızdır.
+ * - Bölüm görevlisi kendi bölümlerini görür ve yönetir; ortak (bölümsüz) veya başka bölümü de içeren kayıtları yalnızca
+ *   yönetici değiştirir.
+ * - Görevli personel atandığı bölüm(ler)i yalnızca görür.
  */
 export function useBolumScope() {
   const { user } = useAuth()
   return useMemo(() => {
     const roles = user?.roles ?? []
-    const isScoped = !hasAnyRole(roles, Yonetici) && roles.includes(Roles.BolumGorevlisi)
-    const own = user?.bolumIds ?? []
+    const gorevli = roles.includes(Roles.BolumGorevlisi)
+    const gp = roles.includes(Roles.GorevliPersonel)
+    const isScoped = !hasAnyRole(roles, Yonetici) && (gorevli || gp)
+    const manage = gorevli ? (user?.bolumIds ?? []) : []
+    const read = [...new Set([...manage, ...(user?.okumaBolumIds ?? [])])]
     return {
       isScoped,
-      /** BolumSelect onlyIds için: görevlide kendi bölümleri, diğerlerinde undefined (tümü) */
-      ownBolumIds: isScoped ? own : undefined,
-      canAccess: (bolumId: number) => !isScoped || own.includes(bolumId),
-      canManage: (bolumIds: readonly number[]) => !isScoped || (bolumIds.length > 0 && bolumIds.every((id) => own.includes(id))),
+      /** BolumSelect onlyIds için: kapsamlı kullanıcıda görebildiği bölümler, diğerlerinde undefined (tümü) */
+      ownBolumIds: isScoped ? read : undefined,
+      /** Görevli personelin bölümü atanmamışsa hiçbir bölüm verisi göremez */
+      noBolum: isScoped && read.length === 0,
+      canAccess: (bolumId: number) => !isScoped || read.includes(bolumId),
+      canManage: (bolumIds: readonly number[]) =>
+        !isScoped || (bolumIds.length > 0 && bolumIds.every((id) => manage.includes(id))),
     }
   }, [user])
 }

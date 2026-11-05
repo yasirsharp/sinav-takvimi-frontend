@@ -16,6 +16,10 @@ export interface AuthContextValue {
   /** Parolayı değiştirir ve backend'in döndüğü yeni token'la oturumu günceller */
   changePassword: (currentPassword: string, newPassword: string) => Promise<void>
   logout: () => void
+  /** Süper yönetici: bu kullanıcı olarak gir. Kişi olarak girilmişken başka kişiye doğrudan geçilebilir. */
+  impersonate: (userId: number) => Promise<void>
+  /** Kişi olarak girilmiş oturumdan süper yöneticinin kendi hesabına dön */
+  stopImpersonation: () => Promise<void>
 }
 
 export const AuthContext = createContext<AuthContextValue | null>(null)

@@ -26,12 +26,24 @@ import { getErrorMessage } from '../../api/errors'
 import PageHeader from '../../components/PageHeader'
 import TableToolbar from '../../components/TableToolbar'
 import DeleteButton from '../../components/DeleteButton'
+import ImpersonateMenu from '../../components/ImpersonateMenu'
+import BolumSelect from '../../components/BolumSelect'
 import CredentialsModal, { type CredentialsInfo } from '../../components/CredentialsModal'
 import { defaultPagination } from '../../components/tableDefaults'
 import { ROLE_COLORS, ROLE_DESCRIPTIONS, Roles, Yonetici, roleLabel } from '../../auth/roles'
 import { useAuth } from '../../auth/useAuth'
 import { compareTr, matchesSearch } from '../../utils/search'
-import { useDeleteUser, useResetPassword, useRoleList, useToggleRole, useUpdateUser, useUserClaims, useUsers } from './queries'
+import {
+  useDeleteUser,
+  useOkumaBolumleri,
+  useResetPassword,
+  useRoleList,
+  useSetOkumaBolumleri,
+  useToggleRole,
+  useUpdateUser,
+  useUserClaims,
+  useUsers,
+} from './queries'
 import { useResetFormOnOpen } from '../../hooks/useResetFormOnOpen'
 import { useErrorToast } from '../../bugReport/useErrorToast'
 
@@ -144,7 +156,7 @@ export default function UsersPage() {
     {
       title: 'İşlemler',
       key: 'actions',
-      width: 170,
+      width: 200,
       align: 'right',
       render: (_, u) => {
         const locked = isProtected(u)
@@ -175,6 +187,7 @@ export default function UsersPage() {
                 onDelete={() => deleteUser.mutateAsync(u.id)}
               />
             )}
+            <ImpersonateMenu userId={u.id} name={fullName(u)} roles={u.roles} active={u.status} />
           </>
         )
       },
@@ -391,8 +404,51 @@ function RoleModal({
               </Checkbox>
             )
           })}
+          {user && claims && sortedRoles.some((r) => r.name === Roles.GorevliPersonel && claims.some((c) => c.operationClaimId === r.id)) && (
+            <GorevliBolumleri userId={user.id} />
+          )}
         </Flex>
       )}
     </Modal>
+  )
+}
+
+/** Görevli personelin göreceği bölümler (birden çok olabilir). Hiç bölüm seçilmezse hiçbir bölüm verisi görmez. */
+function GorevliBolumleri({ userId }: { userId: number }) {
+  const { message } = App.useApp()
+  const showError = useErrorToast()
+  const { data, isLoading } = useOkumaBolumleri(userId)
+  const save = useSetOkumaBolumleri()
+
+  return (
+    <div style={{ marginTop: 4, padding: 12, background: '#f7f5fb', borderRadius: 8 }} data-testid="gp-bolumleri">
+      <Typography.Text strong>Görevli personelin bölümleri</Typography.Text>
+      <Typography.Paragraph type="secondary" style={{ fontSize: 12, margin: '2px 0 8px' }}>
+        Seçilen bölümlerin sınavlarını, derslerini, dersliklerini, personel görevlerini ve öğrencilerini görür; hiçbir şeyi
+        değiştiremez. Seçim hemen kaydedilir.
+      </Typography.Paragraph>
+      <BolumSelect
+        mode="multiple"
+        style={{ width: '100%' }}
+        placeholder="Bölüm seçin"
+        disabled={isLoading}
+        value={data ?? []}
+        aria-label="Görevli personelin bölümleri"
+        onChange={async (value) => {
+          const ids = Array.isArray(value) ? value : value == null ? [] : [value]
+          try {
+            await save.mutateAsync({ userId, bolumIds: ids })
+            message.success(ids.length ? 'Bölümler kaydedildi; kullanıcı bir sonraki işleminde görür.' : 'Bölüm ataması kaldırıldı.')
+          } catch (err) {
+            showError(err)
+          }
+        }}
+      />
+      {!isLoading && (data ?? []).length === 0 && (
+        <Typography.Text type="warning" style={{ fontSize: 12, display: 'block', marginTop: 6 }}>
+          Bölüm seçilmedi: bu kişi hiçbir bölümün verisini göremez.
+        </Typography.Text>
+      )}
+    </div>
   )
 }

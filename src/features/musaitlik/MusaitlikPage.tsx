@@ -34,7 +34,7 @@ import { TekrarTipi, type Musaitlik, type MusaitlikValues, type TekrarTipiValue 
 import { getErrorMessage } from '../../api/errors'
 import PageHeader from '../../components/PageHeader'
 import { useCan } from '../../hooks/usePermission'
-import { Planlayici, Yonetici } from '../../auth/roles'
+import { BolumOkuyucu, Yonetici } from '../../auth/roles'
 import { compareTr, matchesSearch } from '../../utils/search'
 import { useAkademikPersoneller, useOwnPersonel } from '../akademikPersonel/queries'
 import { describeHours, describeRecurrence, expandMusaitlik } from './musaitlikUtils'
@@ -70,7 +70,8 @@ interface FormDefaults {
 }
 
 export default function MusaitlikPage() {
-  const isPlanlayici = useCan(Planlayici)
+  // Planlayıcı ve görevli personel başkalarının müsaitliğini de görür (değiştiremez)
+  const isPlanlayici = useCan(BolumOkuyucu)
   const isYonetici = useCan(Yonetici)
   const { data: personeller } = useAkademikPersoneller()
   const own = useOwnPersonel()
@@ -186,7 +187,7 @@ export default function MusaitlikPage() {
   return (
     <>
       <PageHeader
-        title="Müsaitlik"
+        title={isPlanlayici ? 'Müsaitlik' : 'Müsaitliğim'}
         description="Sınav görevi verilmemesi gereken zamanları işaretleyin. Bu saatlerde gözetmen olarak seçilemezsiniz."
         actions={
           canEdit && personelId != null && (

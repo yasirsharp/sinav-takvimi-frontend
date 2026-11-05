@@ -1,6 +1,12 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { setUnauthorizedHandler } from '../api/client'
-import { changePassword as changePasswordRequest, login as loginRequest } from '../api/auth'
+import {
+  changePassword as changePasswordRequest,
+  impersonate as impersonateRequest,
+  login as loginRequest,
+  stopImpersonation as stopImpersonationRequest,
+} from '../api/auth'
+import { rememberRecentUser } from './recentUsers'
 import { AuthContext, type SessionEndReason } from './authContext'
 import { isExpired, parseToken, type CurrentUser } from './jwt'
 import { tokenStorage } from './tokenStorage'
@@ -37,6 +43,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     tokenStorage.set(token)
     setSessionEndReason(null)
     setUser(parsed)
+    return parsed
   }, [])
 
   const login = useCallback(
@@ -55,6 +62,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [applyToken],
   )
 
+  const impersonate = useCallback(
+    async (userId: number) => {
+      const { token } = await impersonateRequest(userId)
+      const target = applyToken(token)
+      if (target.actAsBy) rememberRecentUser(target.actAsBy.id, { id: target.id, name: target.name || target.email, roles: target.roles })
+    },
+    [applyToken],
+  )
+
+  const stopImpersonation = useCallback(async () => {
+    const { token } = await stopImpersonationRequest()
+    applyToken(token)
+  }, [applyToken])
+
   // Herhangi bir API isteği 401 dönerse oturumu kapat
   useEffect(() => {
     setUnauthorizedHandler(expire)
@@ -71,8 +92,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [user, expire])
 
   const value = useMemo(
-    () => ({ user, sessionEndReason, login, logout, changePassword }),
-    [user, sessionEndReason, login, logout, changePassword],
+    () => ({ user, sessionEndReason, login, logout, changePassword, impersonate, stopImpersonation }),
+    [user, sessionEndReason, login, logout, changePassword, impersonate, stopImpersonation],
   )
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
 }

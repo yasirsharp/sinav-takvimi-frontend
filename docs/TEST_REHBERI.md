@@ -21,7 +21,7 @@ Sistemi daha önce hiç kullanmadıysanız kimseye sormanıza gerek yok:
 - Bir ekranı **ilk kez açtığınızda** o ekranın turu kendiliğinden başlar (ör. Sınav Takvimi: filtreler, yeni
   sınav, sürükleyerek taşıma, PDF raporlar).
 - Sayfa başlığının yanındaki turkuaz **?** düğmesi o ekranın turunu istediğiniz zaman tekrar açar.
-- Üst menüdeki **Yardım** (veya sağ üstteki **?** düğmesi) **Yardım merkezi**ni açar. "sınav taşı", "parola
+- Sağ üstteki **?** düğmesi (veya hesap menüsündeki **Yardım merkezi**) **Yardım merkezi**ni açar. "sınav taşı", "parola
   sıfırla", "Excel", "müsait değilim" gibi yazarak özelliği bulun; açıklamasını okuyun ya da **Sayfaya git ve
   turu başlat** ile ekranına gidip adım adım görün. Sık sorulanlar da burada.
 - Hesap menüsündeki **Tanıtım turunu başlat** genel turu yeniden açar. Yardım merkezindeki **Turları yeniden
@@ -53,6 +53,18 @@ görüntüye hiç girmez. Sayfanın altında yazan sürüm (ör. `v0.11.0 (a1b2c
 
 ## Rolünüze göre denenecekler
 
+Menü role göre sadedir; yalnızca işinize yarayan ekranlar görünür:
+
+| Rol | Menü |
+|---|---|
+| Öğrenci | Ana Sayfa · Sınavlarım |
+| Akademik personel | Ana Sayfa · Sınavlarım · Müsaitliğim · Taleplerim |
+| Görevli personel | Ana Sayfa · Sınav Takvimi · Bölümüm |
+| Bölüm görevlisi | Ana Sayfa · Sınav Takvimi · Talepler · Bölümüm · Duyurular |
+| Yönetici | Ana Sayfa · Sınav Takvimi · Talepler · Tanımlar · Yönetim |
+
+"Bölümüm" ve "Tanımlar" altında dersler, derslikler, personel, ders atamaları, öğrenciler ve müsaitlikler bulunur.
+
 ### Öğrenci
 
 - [ ] İlk girişte parolanızı değiştirin, açılan tanıtım turunu sonuna kadar izleyin.
@@ -66,11 +78,20 @@ görüntüye hiç girmez. Sayfanın altında yazan sürüm (ör. `v0.11.0 (a1b2c
 ### Akademik personel
 
 - [ ] Ana sayfada **Sınav görevlerim**: dersinizin sınavları ve gözetmenlik görevleriniz.
+- [ ] **Sınavlarım**: yalnızca dersini verdiğiniz ve gözetmen olduğunuz sınavlar görünmeli; başka sınav görünmemeli.
+- [ ] Bir sınava tıklayıp **Değişiklik iste** deyin: nedenini ve uygun gün/saati yazın. **Taleplerim**'de "Yanıt
+      bekliyor" görünmeli. Görevli yanıtlayınca zile bildirim gelmeli.
 - [ ] Üstteki zil: size atanan sınav görevleri bildirim olarak gelmeli; tıklayınca takvime gitmeli.
-- [ ] **Müsaitlik**: sınav görevi verilmemesini istediğiniz zamanları girin (tek sefer, her hafta, her ay;
+- [ ] **Müsaitliğim**: sınav görevi verilmemesini istediğiniz zamanları girin (tek sefer, her hafta, her ay;
       tüm gün veya saat aralığı). Takvimde ve listede doğru görünüyor mu?
-- [ ] Sınav takviminde "Sadece benim sınavlarım" filtresi.
 - [ ] Kullanıcı menüsü → **Parolamı değiştir**.
+
+### Görevli personel
+
+- [ ] Ana sayfada atandığınız bölüm(ler)in özeti görünmeli. Bölüm atanmadıysanız "Size henüz bölüm atanmamış"
+      uyarısı çıkmalı.
+- [ ] **Sınav Takvimi** ve **Bölümüm** altındaki ekranlarda yalnızca atandığınız bölümlerin kayıtları görünmeli.
+- [ ] Hiçbir ekranda ekle, düzenle veya sil düğmesi olmamalı.
 
 ### Bölüm görevlisi
 
@@ -85,7 +106,9 @@ Akademik personelin denediklerine ek olarak:
       - "Müsait değil" kaydı olan personel o saat için gözetmen seçilememeli.
 - [ ] Sınavı sürükleyerek başka güne/saate taşıyın, süresini uzatın; çakışma varsa eski yerine dönmeli.
 - [ ] Sınavı düzenleyin ve silin; ilgili hocaya ve gözetmenlere bildirim gitmeli.
-- [ ] **Yönetim → Duyurular**: bölümünüze duyuru yayınlayın (açılır pencere seçeneğiyle de).
+- [ ] **Talepler**: hocaların değişiklik isteklerini görün (menüdeki sayı bekleyenleri gösterir). **Sınavı aç** ile
+      sınavı takvimde düzenleyin, sonra **Kabul et**. Reddederken gerekçe istenmeli. Hocaya bildirim gitmeli.
+- [ ] **Duyurular**: bölümünüze duyuru yayınlayın (açılır pencere seçeneğiyle de).
 - [ ] PDF raporlar: resmi takvim, gözetmen görevlendirme, derslik kullanımı.
 
 ### Yönetici
@@ -95,6 +118,14 @@ Akademik personelin denediklerine ek olarak:
 - [ ] **Yönetim → Kullanıcılar**: arama ve filtreler, rol ekleme/kaldırma, parola sıfırlama, pasifleştirme.
 - [ ] Öğrenci ekleme/düzenleme/pasifleştirme; pasif öğrencinin giriş yapamadığını doğrulayın.
 - [ ] Bölüm görevlisi atama (Bölümler → satırı aç).
+- [ ] Görevli personele bölüm atama: Kullanıcılar → **Roller** → "Görevli Personel" işaretliyken altta bir veya
+      birden çok bölüm seçin.
+- [ ] Yalnızca **süper yönetici**: Kullanıcılar veya Akademik Personel satırında **⋯ → Bu kullanıcı olarak gir**.
+      - Sistem o kişi girmiş gibi açılmalı; üstte turuncu "… olarak kullanıyorsunuz" şeridi görünmeli.
+      - Menü o kişinin rolüne göre değişmeli; o kişinin işlemlerini yapabilmelisiniz.
+      - **Kendi hesabıma dön** (şerit veya hesap menüsü → **Kullanıcı değiştir**) sizi parolasız geri getirmeli.
+      - Kullanıcı değiştir menüsünde son girdiğiniz kişiler listelenmeli; tek tıkla geçebilmelisiniz.
+      - Başka bir süper yöneticiye geçilememeli; kişi olarak girilmişken "Parolamı değiştir" görünmemeli.
 - [ ] Duyurular: farklı hedef kitleler (öğrenciler, personel, belirli bölüm) ve tarih aralıkları.
 
 ## Bilinen kısıtlar

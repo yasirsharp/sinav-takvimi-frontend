@@ -34,7 +34,9 @@ describe('tur kaydı', () => {
     const titles = (roles: string[]) => stepsForRoles(sinav, roles).map((s) => s.title)
     expect(titles(yonetici)).toContain('Yeni sınav')
     expect(titles(akademik)).not.toContain('Yeni sınav')
-    expect(titles(akademik)).toContain('Sadece benim sınavlarım')
+    expect(titles(akademik)).toContain('Değişiklik iste')
+    expect(titles(akademik)).not.toContain('Sadece benim sınavlarım')
+    expect(titles([Roles.BolumGorevlisi])).toContain('Sadece benim sınavlarım')
     expect(titles(ogrenci)).not.toContain('Sadece benim sınavlarım')
   })
 

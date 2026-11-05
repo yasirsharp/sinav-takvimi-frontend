@@ -14,7 +14,11 @@ export interface CurrentUser {
   roles: string[]
   /** Öğrenci için tek bölüm, bölüm görevlisi için birden çok bölüm ("1.BolumId", "2.BolumId"...) */
   bolumIds: number[]
+  /** Görevli personelin salt okunur bölümleri ("1.OkumaBolumId"...) */
+  okumaBolumIds: number[]
   ogrenciNo?: string
+  /** Süper yönetici bu kullanıcı olarak girdiyse gerçek kişi ("act_as_by" claim'i) */
+  actAsBy?: { id: number; name: string }
   /** Geçici parolayla giriş yapıldı: parola değiştirilene kadar diğer sayfalar kapalıdır ("pwd_change" claim'i) */
   mustChangePassword: boolean
   /** Token bitiş zamanı (ms, epoch) */
@@ -44,12 +48,24 @@ export function parseToken(token: string): CurrentUser | null {
     .map(([, value]) => Number(value))
     .filter(Number.isFinite)
 
+  const okumaBolumIds = Object.entries(payload)
+    .filter(([key]) => /^\d+\.OkumaBolumId$/.test(key))
+    .map(([, value]) => Number(value))
+    .filter(Number.isFinite)
+
+  const actAsById = Number(payload.act_as_by)
+  const actAsBy = payload.act_as_by != null && Number.isFinite(actAsById)
+    ? { id: actAsById, name: String(payload.act_as_by_name ?? '') }
+    : undefined
+
   return {
     id,
     name: String(payload[CLAIM_NAME] ?? ''),
     email: String(payload.email ?? ''),
     roles: toStringArray(payload[CLAIM_ROLE]),
     bolumIds,
+    okumaBolumIds,
+    actAsBy,
     ogrenciNo: typeof payload.OgrenciNo === 'string' ? payload.OgrenciNo : undefined,
     mustChangePassword: payload.pwd_change === 'true' || payload.pwd_change === true,
     expiresAt: payload.exp * 1000,

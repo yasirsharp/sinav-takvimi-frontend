@@ -5,6 +5,7 @@ export const userKeys = {
   all: ['users'] as const,
   roles: ['roles'] as const,
   claims: (userId: number) => ['users', userId, 'claims'] as const,
+  okumaBolumleri: (userId: number) => ['users', userId, 'okuma-bolumleri'] as const,
 }
 
 export function useUsers() {
@@ -55,5 +56,19 @@ export function useToggleRole() {
       // Bölüm görevlisi rolü bölüm görevli listelerini etkiler
       void queryClient.invalidateQueries({ queryKey: ['bolumler'] })
     },
+  })
+}
+
+export function useOkumaBolumleri(userId: number) {
+  return useQuery({ queryKey: userKeys.okumaBolumleri(userId), queryFn: () => userApi.okumaBolumleri(userId) })
+}
+
+export function useSetOkumaBolumleri() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: ({ userId, bolumIds }: { userId: number; bolumIds: number[] }) => userApi.setOkumaBolumleri(userId, bolumIds),
+    // Seçim hemen görünsün; açılır liste art arda birkaç bölüm seçmek için açık kalır
+    onMutate: ({ userId, bolumIds }) => queryClient.setQueryData(userKeys.okumaBolumleri(userId), bolumIds),
+    onSettled: (_, __, { userId }) => queryClient.invalidateQueries({ queryKey: userKeys.okumaBolumleri(userId) }),
   })
 }

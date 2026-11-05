@@ -15,8 +15,9 @@ import {
   NotificationOutlined,
   QuestionCircleOutlined,
   BugOutlined,
+  InboxOutlined,
 } from '@ant-design/icons'
-import { Personel, Planlayici, Yonetici } from '../auth/roles'
+import { BolumOkuyucu, Personel, Planlayici, Roles, Yonetici, hasAnyRole } from '../auth/roles'
 import {
   AkademikPersonelPage,
   BugReportsPage,
@@ -29,6 +30,7 @@ import {
   MusaitlikPage,
   OgrenciPage,
   SinavTakvimiPage,
+  TalepPage,
   UsersPage,
 } from './lazyPages'
 
@@ -57,36 +59,38 @@ export function isGroup(entry: NavEntry): entry is NavGroup {
 }
 
 /**
- * Menü ve rotalar bu tek listeden üretilir. Yeni ekran eklerken buraya ekleyin.
+ * Bütün rotalar bu listeden üretilir (adresler değişmez, eski bağlantılar çalışır). Menüde ne görüneceğini ve hangi
+ * adla görüneceğini role göre `menuFor` belirler. Yeni ekran eklerken ikisine de ekleyin.
  */
 export const navigation: NavEntry[] = [
   { path: '/', label: 'Ana Sayfa', icon: <HomeOutlined /> },
   { path: '/sinav-takvimi', label: 'Sınav Takvimi', icon: <CalendarOutlined />, element: <SinavTakvimiPage /> },
+  { path: '/talepler', label: 'Talepler', icon: <InboxOutlined />, roles: Personel, element: <TalepPage /> },
   {
     key: 'tanimlar',
     label: 'Tanımlar',
     icon: <DatabaseOutlined />,
-    roles: Personel,
+    roles: BolumOkuyucu,
     children: [
-      { path: '/tanimlar/bolumler', label: 'Bölümler', icon: <ApartmentOutlined />, roles: Personel, element: <BolumPage /> },
-      { path: '/tanimlar/dersler', label: 'Dersler', icon: <BookOutlined />, roles: Personel, element: <DersPage /> },
-      { path: '/tanimlar/derslikler', label: 'Derslikler', icon: <BankOutlined />, roles: Personel, element: <DerslikPage /> },
+      { path: '/tanimlar/bolumler', label: 'Bölümler', icon: <ApartmentOutlined />, roles: BolumOkuyucu, element: <BolumPage /> },
+      { path: '/tanimlar/dersler', label: 'Dersler', icon: <BookOutlined />, roles: BolumOkuyucu, element: <DersPage /> },
+      { path: '/tanimlar/derslikler', label: 'Derslikler', icon: <BankOutlined />, roles: BolumOkuyucu, element: <DerslikPage /> },
       {
         path: '/tanimlar/akademik-personel',
         label: 'Akademik Personel',
         icon: <TeamOutlined />,
-        roles: Personel,
+        roles: BolumOkuyucu,
         element: <AkademikPersonelPage />,
       },
       {
         path: '/tanimlar/ders-atamalari',
         label: 'Ders Atamaları',
         icon: <SolutionOutlined />,
-        roles: Personel,
+        roles: BolumOkuyucu,
         element: <DbapPage />,
       },
-      // Kişisel veri: yönetici tümünü, bölüm görevlisi kendi bölümünü görür
-      { path: '/tanimlar/ogrenciler', label: 'Öğrenciler', icon: <IdcardOutlined />, roles: Planlayici, element: <OgrenciPage /> },
+      // Kişisel veri: yönetici tümünü, bölüm görevlisi ve görevli personel kendi bölüm(ler)ini görür
+      { path: '/tanimlar/ogrenciler', label: 'Öğrenciler', icon: <IdcardOutlined />, roles: BolumOkuyucu, element: <OgrenciPage /> },
     ],
   },
   { path: '/musaitlik', label: 'Müsaitlik', icon: <ClockCircleOutlined />, roles: Personel, element: <MusaitlikPage /> },
@@ -102,8 +106,76 @@ export const navigation: NavEntry[] = [
       { path: '/yonetim/hata-bildirimleri', label: 'Hata bildirimleri', icon: <BugOutlined />, roles: Yonetici, element: <BugReportsPage /> },
     ],
   },
+  // Menüde yok: üstteki ? düğmesi ve profil menüsünden açılır
   { path: '/yardim', label: 'Yardım', icon: <QuestionCircleOutlined />, element: <HelpPage /> },
 ]
+
+const byPath = new Map(flattenNavigation().map((item) => [item.path, item]))
+
+function page(path: string, label?: string): NavItem {
+  const item = byPath.get(path)!
+  return label ? { ...item, label } : item
+}
+
+function group(key: string, label: string, icon: ReactNode, children: NavItem[]): NavGroup {
+  return { key, label, icon, children }
+}
+
+/**
+ * Role göre sade menü. Birden çok rolü olan kişi en geniş rolün menüsünü görür
+ * (yönetici > bölüm görevlisi > görevli personel > akademik personel > öğrenci).
+ */
+export function menuFor(roles: readonly string[]): NavEntry[] {
+  const ana = page('/')
+  const ap = roles.includes(Roles.AkademikPersonel)
+
+  if (hasAnyRole(roles, Yonetici)) {
+    return [
+      ana,
+      page('/sinav-takvimi'),
+      page('/talepler'),
+      group('tanimlar', 'Tanımlar', <DatabaseOutlined />, [
+        page('/tanimlar/bolumler'),
+        page('/tanimlar/dersler'),
+        page('/tanimlar/derslikler'),
+        page('/tanimlar/akademik-personel', 'Personel'),
+        page('/tanimlar/ders-atamalari'),
+        page('/tanimlar/ogrenciler'),
+        page('/musaitlik', 'Müsaitlikler'),
+      ]),
+      group('yonetim', 'Yönetim', <SafetyOutlined />, [
+        page('/yonetim/kullanicilar'),
+        page('/yonetim/duyurular'),
+        page('/yonetim/hata-bildirimleri'),
+      ]),
+    ]
+  }
+
+  const gorevli = roles.includes(Roles.BolumGorevlisi)
+  if (gorevli || roles.includes(Roles.GorevliPersonel)) {
+    const bolumum = group('bolumum', 'Bölümüm', <ApartmentOutlined />, [
+      page('/tanimlar/dersler'),
+      page('/tanimlar/derslikler'),
+      page('/tanimlar/akademik-personel', 'Personel'),
+      page('/tanimlar/ders-atamalari'),
+      page('/tanimlar/ogrenciler'),
+      page('/musaitlik', 'Müsaitlikler'),
+    ])
+    return [
+      ana,
+      page('/sinav-takvimi'),
+      ...(gorevli ? [page('/talepler')] : ap ? [page('/talepler', 'Taleplerim')] : []),
+      bolumum,
+      ...(gorevli ? [page('/yonetim/duyurular')] : []),
+    ]
+  }
+
+  if (ap) {
+    return [ana, page('/sinav-takvimi', 'Sınavlarım'), page('/musaitlik', 'Müsaitliğim'), page('/talepler', 'Taleplerim')]
+  }
+
+  return [ana, page('/sinav-takvimi', 'Sınavlarım')]
+}
 
 /** Tüm sayfa öğelerini (grupların içindekiler dahil) düz liste olarak döner */
 export function flattenNavigation(entries: NavEntry[] = navigation): NavItem[] {

@@ -1,4 +1,4 @@
-import { Personel, Planlayici, Roles, Yonetici } from '../auth/roles'
+import { BolumOkuyucu, Personel, Planlayici, Roles, Yonetici } from '../auth/roles'
 import { GENEL_TOUR_ID, type FaqItem, type TourDef, type TourStepDef } from './tourModel'
 
 /**
@@ -10,6 +10,7 @@ import { GENEL_TOUR_ID, type FaqItem, type TourDef, type TourStepDef } from './t
 const Ogrenci = [Roles.Ogrenci]
 /** Öğrenci olmayan ama planlama yetkisi de olmayan personel (görevli ve akademik personel) */
 const SadecePersonel = [Roles.GorevliPersonel, Roles.AkademikPersonel]
+const SadeceAkademik = [Roles.AkademikPersonel]
 
 const anaSayfaAdimlari: TourStepDef[] = [
   {
@@ -73,19 +74,37 @@ export const tours: TourDef[] = [
       {
         title: 'Sınav Takvimi Sistemine hoş geldiniz',
         description:
-          'Bu kısa tur ekranları ve en sık kullanılan işlemleri tanıtır. "Sonraki" ile ilerleyin, istediğiniz an sağ üstteki çarpı ile kapatabilirsiniz. Turu daha sonra üst menüdeki "Yardım" sayfasından veya her sayfa başlığının yanındaki "?" düğmesinden tekrar açabilirsiniz.',
+          'Bu kısa tur ekranları ve en sık kullanılan işlemleri tanıtır. "Sonraki" ile ilerleyin, istediğiniz an sağ üstteki çarpı ile kapatabilirsiniz. Turu daha sonra sağ üstteki "?" (Yardım) düğmesinden veya her sayfa başlığının yanındaki "?" düğmesinden tekrar açabilirsiniz.',
       },
       {
         target: 'menu',
         title: 'Ana menü',
         description: 'Tüm ekranlara buradan ulaşırsınız. Menüde yalnızca rolünüzün kullanabileceği ekranlar görünür.',
         bullets: [
-          'Sınav Takvimi: tüm sınavların haftalık, aylık ve liste görünümü.',
-          'Tanımlar: bölüm, ders, derslik, akademik personel, ders atamaları ve öğrenciler.',
-          'Müsaitlik: sınav görevi almak istemediğiniz zamanlar.',
-          'Yönetim: kullanıcılar ve duyurular.',
+          'Sınav Takvimi: sınavların haftalık, aylık ve liste görünümü.',
+          'Talepler: hocaların sınav değişiklik istekleri; kabul edip sınavı düzenlersiniz.',
+          'Tanımlar (bölüm görevlisinde "Bölümüm"): ders, derslik, personel, ders atamaları, öğrenciler ve müsaitlikler.',
+          'Yönetim: kullanıcılar, duyurular ve hata bildirimleri (bölüm görevlisinde yalnızca Duyurular).',
         ],
-        roles: Personel,
+        roles: Planlayici,
+      },
+      {
+        target: 'menu',
+        title: 'Ana menü',
+        description:
+          'Sınav Takvimi ve "Bölümüm" altında atandığınız bölüm(ler)in dersleri, derslikleri, personeli, ders atamaları, öğrencileri ve müsaitlikleri. Her şeyi görürsünüz, değiştiremezsiniz.',
+        roles: [Roles.GorevliPersonel],
+      },
+      {
+        target: 'menu',
+        title: 'Ana menü',
+        description: 'Menü sade: yalnızca size ait olanlar.',
+        bullets: [
+          'Sınavlarım: dersini verdiğiniz ve gözetmen olduğunuz sınavlar.',
+          'Müsaitliğim: sınav görevi almak istemediğiniz zamanlar.',
+          'Taleplerim: sınavlarınız için istediğiniz değişiklikler ve yanıtları.',
+        ],
+        roles: SadeceAkademik,
       },
       {
         target: 'menu',
@@ -115,6 +134,7 @@ export const tours: TourDef[] = [
           'Rolleriniz en üstte yazar.',
           'Parolamı değiştir: parolanızı istediğiniz zaman yenileyebilirsiniz.',
           'Tanıtım turu ve Yardım merkezi: bu turu tekrar başlatır veya yardım sayfasını açar.',
+          'Kullanıcı değiştir (yalnızca süper yönetici): kendi hesabınıza döner veya son girdiğiniz kullanıcılara tek tıkla geçersiniz.',
           'Sorun bildir: hata bildirimi penceresini açar (aşağıda anlatılıyor).',
           'Çıkış yap: ortak bilgisayarda işiniz bitince mutlaka çıkış yapın.',
         ],
@@ -189,6 +209,13 @@ export const tours: TourDef[] = [
         title: 'Sadece benim sınavlarım',
         description:
           'Açınca yalnızca dersini verdiğiniz veya gözetmen olduğunuz sınavlar görünür. Kendi görev programınızı görmenin en hızlı yolu budur.',
+        roles: BolumOkuyucu,
+      },
+      {
+        target: 'sinav-calendar',
+        title: 'Değişiklik iste',
+        description:
+          'Takvimde yalnızca dersini verdiğiniz ve gözetmen olduğunuz sınavlar görünür. Tarih, saat veya derslik uymuyorsa sınava tıklayıp "Değişiklik iste" deyin; nedenini ve uygun zamanı yazın. Talep bölüm görevlisine gider, yanıtı bildirim olarak gelir.',
         roles: Personel,
       },
       {
@@ -247,12 +274,45 @@ export const tours: TourDef[] = [
     ],
   },
   {
+    id: 'talepler',
+    path: '/talepler',
+    title: 'Talepler',
+    summary: 'Hocaların ve gözetmenlerin sınav değişiklik istekleri: kabul, red ve sınavı düzenleme.',
+    keywords: ['talep', 'değişiklik iste', 'istek', 'kabul', 'red', 'taleplerim'],
+    roles: Personel,
+    steps: [
+      {
+        title: 'Değişiklik talepleri',
+        description:
+          'Bir hoca dersinin veya gözetmen olduğu sınavın değişmesini istediğinde talep buraya düşer ve bölümün görevlisine bildirim gider. Menüdeki sayı yanıt bekleyen talepleri gösterir.',
+        roles: Planlayici,
+      },
+      {
+        title: 'Taleplerim',
+        description:
+          'Açtığınız talepler ve yanıtları burada. Yeni talep için Sınavlarım ekranında sınava tıklayıp "Değişiklik iste" deyin. Yanıt gelince bildirim alırsınız.',
+        roles: SadecePersonel,
+      },
+      {
+        target: 'page-actions',
+        title: 'Bekleyen / Tümü',
+        description: 'Varsayılan olarak yanıt bekleyenler listelenir; "Tümü" ile kabul ve reddedilenleri de görün.',
+      },
+      {
+        title: 'Kabul et, sınavı düzenle',
+        description:
+          '"Kabul et" hocaya bildirim gönderir ama sınavı kendiliğinden değiştirmez. "Sınavı aç" ile takvimde o sınavı açıp tarih, saat veya dersliği düzenleyin; çakışma kontrolü her zamanki gibi çalışır. Reddederken kısa bir gerekçe yazmanız gerekir.',
+        roles: Planlayici,
+      },
+    ],
+  },
+  {
     id: 'bolumler',
     path: '/tanimlar/bolumler',
     title: 'Bölümler',
     summary: 'Bölüm ekleme, Excel ile toplu aktarma ve bölüm görevlisi atama.',
     keywords: ['bölüm ekle', 'bölüm görevlisi', 'görevli ata', 'yetki'],
-    roles: Personel,
+    roles: BolumOkuyucu,
     steps: [
       {
         target: 'add',
@@ -288,7 +348,7 @@ export const tours: TourDef[] = [
     title: 'Dersler',
     summary: 'Ders kodu ve adı, dersin verildiği bölümler, ortak dersler ve Excel ile aktarma.',
     keywords: ['ders ekle', 'ders kodu', 'ortak ders'],
-    roles: Personel,
+    roles: BolumOkuyucu,
     steps: [
       {
         target: 'add',
@@ -317,7 +377,7 @@ export const tours: TourDef[] = [
     title: 'Derslikler',
     summary: 'Sınav yapılabilecek derslikler, kapasiteleri, ortak derslikler ve Excel ile aktarma.',
     keywords: ['derslik ekle', 'sınıf', 'salon', 'kapasite', 'ortak derslik'],
-    roles: Personel,
+    roles: BolumOkuyucu,
     steps: [
       {
         target: 'add',
@@ -346,7 +406,7 @@ export const tours: TourDef[] = [
     title: 'Akademik Personel',
     summary: 'Öğretim elemanı ve gözetmen ekleme, otomatik kullanıcı hesabı ve geçici parola.',
     keywords: ['hoca', 'öğretim elemanı', 'personel ekle', 'gözetmen', 'hesap', 'geçici parola'],
-    roles: Personel,
+    roles: BolumOkuyucu,
     steps: [
       {
         target: 'add',
@@ -376,7 +436,7 @@ export const tours: TourDef[] = [
     title: 'Ders Atamaları',
     summary: 'Hangi dersi hangi bölümde kimin verdiği. Sınavlar bu atamalar üzerinden eklenir.',
     keywords: ['dbap', 'atama', 'öğretim elemanı ata', 'dersi veren', 'hoca ata'],
-    roles: Personel,
+    roles: BolumOkuyucu,
     steps: [
       {
         title: 'Ders ataması nedir?',
@@ -409,7 +469,7 @@ export const tours: TourDef[] = [
     title: 'Öğrenciler',
     summary: 'Öğrenci ekleme, Excel ile toplu aktarma, kullanıcı hesabı ve sınıf filtresi.',
     keywords: ['öğrenci ekle', 'öğrenci no', 'sınıf', 'hesap', 'geçici parola'],
-    roles: Planlayici,
+    roles: BolumOkuyucu,
     steps: [
       {
         target: 'add',
@@ -445,8 +505,8 @@ export const tours: TourDef[] = [
       {
         target: 'musaitlik-personel',
         title: 'Personel seçimi',
-        description: 'Bölüm görevlisi ve yönetici buradan herhangi bir personelin müsaitliğini görebilir. Değiştirmeyi kişinin kendisi ve yönetici yapar.',
-        roles: Planlayici,
+        description: 'Bölüm görevlisi, görevli personel ve yönetici buradan herhangi bir personelin müsaitliğini görebilir. Değiştirmeyi kişinin kendisi ve yönetici yapar.',
+        roles: BolumOkuyucu,
       },
       {
         target: 'musaitlik-view',
@@ -629,7 +689,7 @@ export const faq: FaqItem[] = [
   {
     question: 'Takvimde bazı sınavları göremiyorum.',
     answer:
-      'Bölüm veya derslik filtresi ya da "Sadece benim sınavlarım" açık olabilir; filtreleri temizleyin. Öğrenciler yalnızca kendi bölümlerinin sınavlarını görür.',
+      'Bölüm veya derslik filtresi ya da "Sadece benim sınavlarım" açık olabilir; filtreleri temizleyin. Öğrenciler yalnızca kendi bölümlerinin, akademik personel yalnızca dersini verdiği ve gözetmen olduğu, görevli personel atandığı bölümlerin sınavlarını görür.',
     keywords: ['görünmüyor', 'filtre', 'eksik'],
   },
   {
@@ -644,6 +704,26 @@ export const faq: FaqItem[] = [
       'Yalnızca "Müsait değilim" kayıtları gözetmen atamasını engeller; "Müsaitim (tercih)" engellemez. Kayıt sınav atandıktan sonra girildiyse planlayıcıya haber verin.',
     keywords: ['müsaitlik', 'gözetmen'],
     roles: SadecePersonel,
+  },
+  {
+    question: 'Sınavımın saati bana uymuyor, nasıl değiştirtirim?',
+    answer:
+      'Sınavlarım ekranında sınava tıklayın ve "Değişiklik iste" deyin. Nedenini ve uygun olduğunuz gün ve saati yazın. Talep bölüm görevlisine gider; kabul ya da red yanıtı bildirim olarak gelir. Taleplerinizi Taleplerim ekranından izlersiniz.',
+    keywords: ['değişiklik iste', 'talep', 'saat değiştir', 'tarih değiştir', 'uymuyor'],
+    roles: Personel,
+  },
+  {
+    question: 'Süper yönetici olarak başka bir kullanıcının ekranını nasıl görürüm?',
+    answer:
+      'Kullanıcılar veya Akademik Personel listesinde satır sonundaki "⋯" düğmesine basıp "Bu kullanıcı olarak gir" deyin. Sistem o kişi girmiş gibi açılır; üstte turuncu bir şerit çıkar. "Kendi hesabıma dön" ile ya da hesap menüsündeki "Kullanıcı değiştir" ile geri dönersiniz; son girdiğiniz kullanıcılara oradan tek tıkla geçersiniz. Yaptığınız değişiklikler kayıtlara "(sizin adınıza)" notuyla geçer. Başka bir süper yöneticiye geçilemez, kişi olarak girilmişken parola değiştirilemez.',
+    keywords: ['kullanıcı olarak gir', 'kullanıcı değiştir', 'kimliğine bürün', 'otomatik giriş', 'geçiş'],
+    roles: [Roles.SuperAdmin],
+  },
+  {
+    question: 'Görevli personel olarak hiçbir şey göremiyorum.',
+    answer: 'Görevli personel yalnızca atandığı bölümlerin verisini görür. Yöneticiniz Kullanıcılar → Roller penceresinde size bölüm seçmelidir.',
+    keywords: ['görevli personel', 'boş', 'bölüm atanmamış'],
+    roles: [Roles.GorevliPersonel],
   },
   {
     question: 'Telefonda kullanabilir miyim?',

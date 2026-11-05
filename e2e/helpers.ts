@@ -61,3 +61,14 @@ export function dayFromToday(n: number): string {
   d.setUTCDate(d.getUTCDate() + n)
   return d.toISOString().slice(0, 10)
 }
+
+/**
+ * Açılan pencereyi döner, açılış animasyonu bitince. Animasyon sürerken yapılan tıklama düğmeyi veya açılır
+ * listedeki seçeneği ıskalayabiliyor (pencere büyürken öğeler yer değiştirir).
+ */
+export async function openedDialog(page: Page, name?: string) {
+  const dialog = name ? page.getByRole('dialog', { name }) : page.getByRole('dialog')
+  await expect(dialog).toBeVisible()
+  await expect(page.locator('.ant-modal-wrap .ant-zoom-appear, .ant-modal-wrap .ant-zoom-enter')).toHaveCount(0)
+  return dialog
+}

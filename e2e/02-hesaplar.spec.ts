@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { adminToken, api, apiLogin, loginAsAdmin } from './helpers'
+import { adminToken, api, apiLogin, loginAsAdmin, openedDialog } from './helpers'
 
 test.describe.configure({ mode: 'serial' })
 
@@ -7,12 +7,12 @@ test('öğrenci eklenir, geçici parola gösterilir, pasifleştirilince giriş y
   await loginAsAdmin(page)
   await page.goto('/tanimlar/ogrenciler')
   await page.getByRole('button', { name: 'Yeni öğrenci' }).click()
-  const dialog = page.getByRole('dialog')
+  const dialog = await openedDialog(page)
   await dialog.getByLabel('Öğrenci numarası').fill('2026500001')
   await dialog.getByLabel('Ad', { exact: true }).fill('Kerem')
   await dialog.getByLabel('Soyad').fill('Işık')
   await dialog.getByLabel('Bölüm').click()
-  await page.getByTitle('Bilgisayar Mühendisliği').last().click()
+  await page.locator('.ant-select-dropdown:visible').getByTitle('Bilgisayar Mühendisliği').click()
   await dialog.getByRole('button', { name: 'Kaydet' }).click()
 
   const credentials = page.getByRole('dialog', { name: 'Öğrenci eklendi' })

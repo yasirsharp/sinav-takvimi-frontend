@@ -32,3 +32,21 @@ export async function changePassword(currentPassword: string, newPassword: strin
   }
   return data.data
 }
+
+/** Süper yönetici: verilen kullanıcı olarak oturum açar (o kişinin rolleriyle token döner) */
+export async function impersonate(userId: number): Promise<AccessToken> {
+  const { data } = await apiClient.post<ApiResult<AccessToken>>(`/api/Auth/impersonate/${userId}`)
+  if (!data.success || !data.data?.token) {
+    throw new Error(data.message || 'Bu kullanıcı olarak girilemedi.')
+  }
+  return data.data
+}
+
+/** Kişi olarak girilmiş oturumdan süper yöneticinin kendi hesabına döner */
+export async function stopImpersonation(): Promise<AccessToken> {
+  const { data } = await apiClient.post<ApiResult<AccessToken>>('/api/Auth/stop-impersonation')
+  if (!data.success || !data.data?.token) {
+    throw new Error(data.message || 'Kendi hesabınıza dönülemedi.')
+  }
+  return data.data
+}
